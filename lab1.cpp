@@ -2,38 +2,48 @@
 
 Lab1::Lab1(QWidget *parent) : QWidget(parent)
 {
-    //there is a lot of repetition here but i couldnt be bothered to refactor
-    seriesX = new QLineSeries();
+    //Initialize all series and append them to vector
+    //from now on we will be refering to them using the Series enum
+
+    auto seriesX = new QLineSeries(this);
     seriesX->setName("X(t)");
     seriesX->setColor(QColor("cornflowerblue"));
+    seriesVec.append(seriesX);
 
-    seriesY = new QLineSeries();
+    auto seriesY = new QLineSeries(this);
     seriesY->setColor(QColor("palegreen"));
     seriesY->setName("Y(t)");
+    seriesVec.append(seriesY);
 
-    seriesZ = new QLineSeries();
+    auto seriesZ = new QLineSeries(this);
     seriesZ->setColor(QColor("peachpuff"));
     seriesZ->setName("Z(t)");
+    seriesVec.append(seriesZ);
 
-    seriesU = new QLineSeries();
+    auto seriesU = new QLineSeries(this);
     seriesU->setColor(QColor("orchid"));
     seriesU->setName("Y(t)");
+    seriesVec.append(seriesU);
 
-    seriesV = new QLineSeries();
+    auto seriesV = new QLineSeries(this);
     seriesV->setColor(QColor("navajowhite"));
     seriesV->setName("V(t)");
+    seriesVec.append(seriesV);
 
-    seriesP1 = new QLineSeries();
+    auto seriesP1 = new QLineSeries(this);
     seriesP1->setColor(QColor("tomato"));
     seriesP1->setName("P1(t)");
+    seriesVec.append(seriesP1);
 
-    seriesP2 = new QLineSeries();
+    auto seriesP2 = new QLineSeries(this);
     seriesP2->setColor(QColor("crimson"));
     seriesP2->setName("P2(t)");
+    seriesVec.append(seriesP2);
 
-    seriesP3 = new QLineSeries();
+    auto seriesP3 = new QLineSeries(this);
     seriesP3->setColor(QColor("pink"));
     seriesP3->setName("P3(t)");
+    seriesVec.append(seriesP3);
 
     auto mainLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
     auto leftBarLayout = new QGridLayout();
@@ -187,181 +197,51 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
 
     chartView->chart()->setTheme(QChart::ChartThemeDark);
 
-    QObject::connect(this, SIGNAL(xChanged()), this, SLOT(calculateX()));
-    QObject::connect(this, SIGNAL(yChanged()), this, SLOT(calculateY()));
-    QObject::connect(this, SIGNAL(zChanged()), this, SLOT(calculateZ()));
-    QObject::connect(this, SIGNAL(uChanged()), this, SLOT(calculateU()));
-    QObject::connect(this, SIGNAL(vChanged()), this, SLOT(calculateV()));
-    QObject::connect(this, SIGNAL(pChanged()), this, SLOT(calculateP()));
+    QObject::connect(chartX, &QCheckBox::stateChanged, this, [=](int sel){handleSeriesSelectionChanged(sel, Series::seriesX);});
+    QObject::connect(chartY, &QCheckBox::stateChanged, this, [=](int sel){handleSeriesSelectionChanged(sel, Series::seriesY);});
+    QObject::connect(chartZ, &QCheckBox::stateChanged, this, [=](int sel){handleSeriesSelectionChanged(sel, Series::seriesZ);});
+    QObject::connect(chartU, &QCheckBox::stateChanged, this, [=](int sel){handleSeriesSelectionChanged(sel, Series::seriesU);});
+    QObject::connect(chartV, &QCheckBox::stateChanged, this, [=](int sel){handleSeriesSelectionChanged(sel, Series::seriesV);});
+    QObject::connect(chartP, &QCheckBox::stateChanged, this, [=](int sel){handleSeriesSelectionChanged(sel, Series::seriesP);});
 
-    QObject::connect(chartX, SIGNAL(stateChanged(int)), this, SLOT(handleXselected(int)));
-    QObject::connect(chartY, SIGNAL(stateChanged(int)), this, SLOT(handleYselected(int)));
-    QObject::connect(chartZ, SIGNAL(stateChanged(int)), this, SLOT(handleZselected(int)));
-    QObject::connect(chartU, SIGNAL(stateChanged(int)), this, SLOT(handleUselected(int)));
-    QObject::connect(chartV, SIGNAL(stateChanged(int)), this, SLOT(handleVselected(int)));
-    QObject::connect(chartP, SIGNAL(stateChanged(int)), this, SLOT(handlePselected(int)));
+    QObject::connect(userIndex, &QSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesX);
+                                                                      calculateSeries(Series::seriesY);
+                                                                      calculateSeries(Series::seriesZ);
+                                                                      calculateSeries(Series::seriesU);});
 
-    QObject::connect(userIndex, SIGNAL(editingFinished()), this, SLOT(calculateX()));
-    QObject::connect(userIndex, SIGNAL(editingFinished()), this, SLOT(calculateY()));
-    QObject::connect(userIndex, SIGNAL(editingFinished()), this, SLOT(calculateZ()));
-    QObject::connect(userIndex, SIGNAL(editingFinished()), this, SLOT(calculateU()));
+    QObject::connect(rangeFrom, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesY);
+                                                                            calculateSeries(Series::seriesZ);
+                                                                            calculateSeries(Series::seriesU);
+                                                                            calculateSeries(Series::seriesP);});
 
-    QObject::connect(rangeFrom, SIGNAL(editingFinished()), this, SLOT(calculateY()));
-    QObject::connect(rangeFrom, SIGNAL(editingFinished()), this, SLOT(calculateZ()));
-    QObject::connect(rangeFrom, SIGNAL(editingFinished()), this, SLOT(calculateU()));
-    QObject::connect(rangeFrom, SIGNAL(editingFinished()), this, SLOT(calculateP()));
+    QObject::connect(rangeTo, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesY);
+                                                                            calculateSeries(Series::seriesZ);
+                                                                            calculateSeries(Series::seriesU);
+                                                                            calculateSeries(Series::seriesP);});
 
-    QObject::connect(rangeTo, SIGNAL(editingFinished()), this, SLOT(calculateY()));
-    QObject::connect(rangeTo, SIGNAL(editingFinished()), this, SLOT(calculateZ()));
-    QObject::connect(rangeTo, SIGNAL(editingFinished()), this, SLOT(calculateU()));
-    QObject::connect(rangeTo, SIGNAL(editingFinished()), this, SLOT(calculateP()));
+    QObject::connect(steps, &QSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesX);
+                                                                  calculateSeries(Series::seriesY);
+                                                                  calculateSeries(Series::seriesZ);
+                                                                  calculateSeries(Series::seriesU);
+                                                                  calculateSeries(Series::seriesP);});
 
-    QObject::connect(steps, SIGNAL(editingFinished()), this, SLOT(calculateX()));
-    QObject::connect(steps, SIGNAL(editingFinished()), this, SLOT(calculateY()));
-    QObject::connect(steps, SIGNAL(editingFinished()), this, SLOT(calculateZ()));
-    QObject::connect(steps, SIGNAL(editingFinished()), this, SLOT(calculateU()));
-    QObject::connect(steps, SIGNAL(editingFinished()), this, SLOT(calculateP()));
+    QObject::connect(rangeFrom1, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
+    QObject::connect(rangeTo1, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
+    QObject::connect(rangeFrom2, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
+    QObject::connect(rangeTo2, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
+    QObject::connect(rangeFrom3, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
+    QObject::connect(rangeTo3, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
 
-    QObject::connect(rangeFrom1, SIGNAL(editingFinished()), this, SLOT(calculateV()));
-    QObject::connect(rangeTo1, SIGNAL(editingFinished()), this, SLOT(calculateV()));
-    QObject::connect(rangeFrom2, SIGNAL(editingFinished()), this, SLOT(calculateV()));
-    QObject::connect(rangeTo2, SIGNAL(editingFinished()), this, SLOT(calculateV()));
-    QObject::connect(rangeFrom3, SIGNAL(editingFinished()), this, SLOT(calculateV()));
-    QObject::connect(rangeTo3, SIGNAL(editingFinished()), this, SLOT(calculateV()));
+    QObject::connect(numberSet, &QLineEdit::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
 
-    QObject::connect(numberSet, SIGNAL(editingFinished()), this, SLOT(calculateP()));
-
-    calculateX();
-    calculateY();
-    calculateZ();
-    calculateU();
-    calculateP();
-    calculateV();
+    calculateSeries(Series::seriesX);
+    calculateSeries(Series::seriesY);
+    calculateSeries(Series::seriesZ);
+    calculateSeries(Series::seriesU);
+    calculateSeries(Series::seriesV);
+    calculateSeries(Series::seriesP);
 }
 
-void Lab1::handleXselected(int selected)
-{
-    Q_ASSERT(seriesX);
-    if(selected == 2)
-    {
-        chartView->chart()->addSeries(seriesX);
-        chartView->chart()->createDefaultAxes();
-    }
-    else
-    {
-        chartView->chart()->removeSeries(seriesX);
-        auto series = chartView->chart()->series();
-        for(auto item : series)
-            chartView->chart()->removeSeries(item);
-        for(auto item : series)
-            chartView->chart()->addSeries(item);
-        chartView->chart()->createDefaultAxes();
-    }
-}
-
-void Lab1::handleYselected(int selected)
-{
-    Q_ASSERT(seriesY);
-    if(selected == 2)
-    {
-        chartView->chart()->addSeries(seriesY);
-        chartView->chart()->createDefaultAxes();
-    }
-    else
-    {
-        chartView->chart()->removeSeries(seriesY);
-        auto series = chartView->chart()->series();
-        for(auto item : series)
-            chartView->chart()->removeSeries(item);
-        for(auto item : series)
-            chartView->chart()->addSeries(item);
-        chartView->chart()->createDefaultAxes();
-    }
-}
-
-void Lab1::handleZselected(int selected)
-{
-    Q_ASSERT(seriesZ);
-    if(selected == 2)
-    {
-        chartView->chart()->addSeries(seriesZ);
-        chartView->chart()->createDefaultAxes();
-    }
-    else
-    {
-        chartView->chart()->removeSeries(seriesZ);
-        auto series = chartView->chart()->series();
-        for(auto item : series)
-            chartView->chart()->removeSeries(item);
-        for(auto item : series)
-            chartView->chart()->addSeries(item);
-        chartView->chart()->createDefaultAxes();
-    }
-}
-
-void Lab1::handleUselected(int selected)
-{
-    Q_ASSERT(seriesU);
-    if(selected == 2)
-    {
-        chartView->chart()->addSeries(seriesU);
-        chartView->chart()->createDefaultAxes();
-    }
-    else
-    {
-        chartView->chart()->removeSeries(seriesU);
-        auto series = chartView->chart()->series();
-        for(auto item : series)
-            chartView->chart()->removeSeries(item);
-        for(auto item : series)
-            chartView->chart()->addSeries(item);
-        chartView->chart()->createDefaultAxes();
-    }
-}
-
-void Lab1::handleVselected(int selected)
-{
-    Q_ASSERT(seriesV);
-    if(selected == 2)
-    {
-        chartView->chart()->addSeries(seriesV);
-        chartView->chart()->createDefaultAxes();
-    }
-    else
-    {
-        chartView->chart()->removeSeries(seriesV);
-        auto series = chartView->chart()->series();
-        for(auto item : series)
-            chartView->chart()->removeSeries(item);
-        for(auto item : series)
-            chartView->chart()->addSeries(item);
-        chartView->chart()->createDefaultAxes();
-    }
-}
-
-void Lab1::handlePselected(int selected)
-{
-    Q_ASSERT(seriesP1 && seriesP2 && seriesP3);
-    if(selected == 2)
-    {
-        chartView->chart()->addSeries(seriesP1);
-        chartView->chart()->addSeries(seriesP2);
-        chartView->chart()->addSeries(seriesP3);
-        chartView->chart()->createDefaultAxes();
-    }
-    else
-    {
-        chartView->chart()->removeSeries(seriesP1);
-        chartView->chart()->removeSeries(seriesP2);
-        chartView->chart()->removeSeries(seriesP3);
-        auto series = chartView->chart()->series();
-        for(auto item : series)
-            chartView->chart()->removeSeries(item);
-        for(auto item : series)
-            chartView->chart()->addSeries(item);
-        chartView->chart()->createDefaultAxes();
-    }
-}
 
 QVector<int> Lab1::parsedIndex()
 {
@@ -416,225 +296,208 @@ double Lab1::uFunction(double x, QVector<int> indexData)
                 - 1.8*sin(0.4*x*zFunction(x, indexData)*xFunction(x, indexData));
 }
 
-
-void Lab1::calculateX()
+void Lab1::handleSeriesSelectionChanged(int selected, Series type)
 {
-    QVector<int> indexData = parsedIndex();
-    double rangeF = -10;
-    double rangeT = 10;
-    if(rangeF>rangeT)
-        return;
-    int steps = this->steps->text().toInt();
-    if(steps<=0)
-        return;
-    double step = (rangeT - rangeF)/steps;
-
-    bool contains = chartView->chart()->series().contains(seriesX);
-    if(contains)
-       chartView->chart()->removeSeries(seriesX);
-
-    seriesX->clear();
-    for(double x = rangeF; x<=rangeT; x+=step)
-        seriesX->append(x, xFunction(x, indexData));
-    if(contains)
-        handleXselected(2);
-    double det = indexData[1]*indexData[1]-4*indexData[0]*indexData[2];
-    if(det>0)
+    Q_ASSERT(seriesVec.length()>=8);
+    auto series = seriesVec.at(type);
+    if(type == Series::seriesP)
     {
-        additionalOutput->setPlainText("Miejsca zerowe X(t)\n"+
-                    QString::number((-indexData[1]+sqrt(det))/(2*indexData[0]))
-                    +"\n"+ QString::number((-indexData[1]-sqrt(det))/(2*indexData[0])));
-    }
-    else if(det==0)
-    {
-        additionalOutput->setPlainText("Miejsce zerowe X(t)\n"+
-                    QString::number(((-indexData[1])/(2*indexData[0]))));
-    }
-    else if(det<0)
-    {
-        additionalOutput->setPlainText("Miejsca zerowe X(t)\n"+
-                                       QString::number(((-indexData[1])/(2*indexData[0])))+"+"+
-                                       QString::number(sqrt(-det)/(2*indexData[0]))+"i"+"\n"+
-                                       QString::number(((-indexData[1])/(2*indexData[0])))+"-"+
-                                       QString::number(sqrt(-det)/(2*indexData[0]))+"i");
-    }
-}
-
-void Lab1::calculateY()
-{
-    QVector<int> indexData = parsedIndex();
-    double rangeF = this->rangeFrom->value();
-    double rangeT = this->rangeTo->value();
-    if(rangeF>rangeT)
-        return;
-    int steps = this->steps->text().toInt();
-    if(steps<=0)
-        return;
-    double step = (rangeT - rangeF)/steps;
-    Q_ASSERT(indexData.length()>=6);
-
-    bool contains = chartView->chart()->series().contains(seriesY);
-    if(contains)
-       chartView->chart()->removeSeries(seriesY);
-    seriesY->clear();
-
-    for(double x = rangeF; x<=rangeT; x+=step)
-        seriesY->append(x, yFunction(x, parsedIndex()));
-
-    if(contains)
-        handleYselected(2);
-}
-
-void Lab1::calculateZ()
-{
-    QVector<int> indexData = parsedIndex();
-    double rangeF = this->rangeFrom->value();
-    double rangeT = this->rangeTo->value();
-    if(rangeF>rangeT)
-        return;
-    int steps = this->steps->text().toInt();
-    if(steps<=0)
-        return;
-    double step = (rangeT - rangeF)/steps;
-    Q_ASSERT(indexData.length()>=6);
-
-    bool contains = chartView->chart()->series().contains(seriesZ);
-    if(contains)
-       chartView->chart()->removeSeries(seriesZ);
-
-    seriesZ->clear();
-    for(double x = rangeF; x<=rangeT; x+=step)
-        seriesZ->append(x, zFunction(x, parsedIndex()));
-
-    if(contains)
-        handleZselected(2);
-
-}
-
-void Lab1::calculateU()
-{
-    QVector<int> indexData = parsedIndex();
-    double rangeF = this->rangeFrom->value();
-    double rangeT = this->rangeTo->value();
-    if(rangeF>rangeT)
-        return;
-    int steps = this->steps->text().toInt();
-    if(steps<=0)
-        return;
-    double step = (rangeT - rangeF)/steps;
-    Q_ASSERT(indexData.length()>=6);
-
-    bool contains = chartView->chart()->series().contains(seriesU);
-    if(contains)
-       chartView->chart()->removeSeries(seriesU);
-
-    seriesU->clear();
-    for(double x = rangeF; x<=rangeT; x+=step)
-        seriesU->append(x, uFunction(x, parsedIndex()));
-
-    if(contains)
-        handleUselected(2);
-}
-
-void Lab1::calculateV()
-{
-    double range1From = rangeFrom1->value();
-    double range2From = rangeFrom2->value();
-    double range3From = rangeFrom3->value();
-    double range1To = rangeTo1->value();
-    double range2To = rangeTo2->value();
-    double range3To = rangeTo3->value();
-
-    int steps = this->steps->text().toInt();
-    if(steps<=0)
-        return;
-    if(range1From<range1To || range2From>range2To || range3From<range3To)
-        return;
-    if(range1To>range3From)
-        return;
-    double step = (range3From - range1To)/steps;
-
-    bool contains = chartView->chart()->series().contains(seriesV);
-    if(contains)
-       chartView->chart()->removeSeries(seriesV);
-
-    seriesV->clear();
-    for(double x = range1To; x<range1From; x+=step)
-        seriesV->append(x, (1-7*x)*qSin((2*M_PI*x*10)/(x+0.04)));
-    for(double x = range2From; x<range2To; x+=step)
-        seriesV->append(x, 0.63*x*qSin(125*x));
-    for(double x = range3To; x<=range3From; x+=step)
-        seriesV->append(x, qPow(x, -0.662)+0.77*qSin(8*x));
-
-    if(contains)
-        handleVselected(2);
-
-}
-
-void Lab1::calculateP()
-{
-    QVector<int> set = parsedNumberSet();
-    double rangeF = this->rangeFrom->value();
-    double rangeT = this->rangeTo->value();
-    if(rangeF>rangeT)
-        return;
-    int steps = this->steps->text().toInt();
-    if(steps<=0)
-        return;
-    double step = (rangeT - rangeF)/steps;
-    Q_ASSERT(set.length()>=3);
-
-    bool contains = chartView->chart()->series().contains(seriesP1) ||
-                    chartView->chart()->series().contains(seriesP2) ||
-                    chartView->chart()->series().contains(seriesP3);
-    if(contains)
-    {
-       chartView->chart()->removeSeries(seriesP1);
-       chartView->chart()->removeSeries(seriesP2);
-       chartView->chart()->removeSeries(seriesP3);
-    }
-
-    seriesP1->clear();
-    seriesP2->clear();
-    seriesP3->clear();
-
-    if(set.length()>0)
-    {
-        for(double x = rangeF; x<=rangeT; x+=step)
+        if(selected == 2)
         {
-            double y=0;
-            for(int number=1; number<=set[0]; number++)
-            {
-                y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
-            }
-            seriesP1->append(x, y);
+            chartView->chart()->addSeries(series);
+            chartView->chart()->addSeries(seriesVec.at(type+1));
+            chartView->chart()->addSeries(seriesVec.at(type+2));
+            chartView->chart()->createDefaultAxes();
+        }
+        else
+        {
+            chartView->chart()->removeSeries(series);
+            chartView->chart()->removeSeries(seriesVec.at(type+1));
+            chartView->chart()->removeSeries(seriesVec.at(type+2));
+            auto series = chartView->chart()->series();
+            for(auto item : series)
+                chartView->chart()->removeSeries(item);
+            for(auto item : series)
+                chartView->chart()->addSeries(item);
+            chartView->chart()->createDefaultAxes();
         }
     }
-    if(set.length()>1)
+    else
     {
-        for(double x = rangeF; x<=rangeT; x+=step)
+        if(selected == 2)
         {
-            double y=0;
-            for(int number=1; number<=set[1]; number++)
-            {
-                y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
-            }
-            seriesP2->append(x, y);
+            chartView->chart()->addSeries(series);
+            chartView->chart()->createDefaultAxes();
+        }
+        else
+        {
+            chartView->chart()->removeSeries(series);
+            auto series = chartView->chart()->series();
+            for(auto item : series)
+                chartView->chart()->removeSeries(item);
+            for(auto item : series)
+                chartView->chart()->addSeries(item);
+            chartView->chart()->createDefaultAxes();
         }
     }
-    if(set.length()>2)
+}
+
+void Lab1::calculateSeries(Series type)
+{
+    auto series = seriesVec.at(type);
+    QVector<int> indexData = parsedIndex();
+    double rangeF = rangeFrom->value();
+    double rangeT = rangeTo->value();
+    if(rangeF>rangeT)
+        return;
+    int steps = this->steps->text().toInt();
+    if(steps<=0)
+        return;
+    double step = (rangeT - rangeF)/steps;
+
+    bool contains;
+    if(type == Series::seriesP)
+    {
+        contains = chartView->chart()->series().contains(series) ||
+                   chartView->chart()->series().contains(seriesVec.at(type+1)) ||
+                   chartView->chart()->series().contains(seriesVec.at(type+2));
+        if(contains)
+        {
+            chartView->chart()->removeSeries(series);
+            chartView->chart()->removeSeries(seriesVec.at(type+1));
+            chartView->chart()->removeSeries(seriesVec.at(type+2));
+        }
+        series->clear();
+        seriesVec.at(type+1)->clear();
+        seriesVec.at(type+2)->clear();
+    }
+    else
+    {
+        contains = chartView->chart()->series().contains(series);
+        if(contains)
+           chartView->chart()->removeSeries(series);
+        series->clear();
+    }
+
+    switch (type) {
+    case Series::seriesX:
+    {
+        rangeF = -10;
+        rangeT = 10;
+        for(double x = rangeF; x<=rangeT; x+=step)
+            series->append(x, xFunction(x, indexData));
+        double det = indexData[1]*indexData[1]-4*indexData[0]*indexData[2];
+        if(det>0)
+        {
+            additionalOutput->setPlainText("Miejsca zerowe X(t)\n"+
+                                           QString::number((-indexData[1]+sqrt(det))/(2*indexData[0]))
+                                           +"\n"+ QString::number((-indexData[1]-sqrt(det))/(2*indexData[0])));
+        }
+        else if(det==0)
+        {
+            additionalOutput->setPlainText("Miejsce zerowe X(t)\n"+
+                                           QString::number(((-indexData[1])/(2*indexData[0]))));
+        }
+        else if(det<0)
+        {
+            additionalOutput->setPlainText("Miejsca zerowe X(t)\n"+
+                                           QString::number(((-indexData[1])/(2*indexData[0])))+"+"+
+                                           QString::number(sqrt(-det)/(2*indexData[0]))+"i"+"\n"+
+                                           QString::number(((-indexData[1])/(2*indexData[0])))+"-"+
+                                           QString::number(sqrt(-det)/(2*indexData[0]))+"i");
+        }
+        break;
+    }
+    case Series::seriesY:
     {
         for(double x = rangeF; x<=rangeT; x+=step)
+            series->append(x, yFunction(x, parsedIndex()));
+        break;
+    }
+    case Series::seriesZ:
+    {
+        for(double x = rangeF; x<=rangeT; x+=step)
+            series->append(x, zFunction(x, parsedIndex()));
+        break;
+    }
+    case Series::seriesU:
+    {
+        for(double x = rangeF; x<=rangeT; x+=step)
+            series->append(x, uFunction(x, parsedIndex()));
+        break;
+    }
+    case Series::seriesV:
+    {
+        double range1From = rangeFrom1->value();
+        double range2From = rangeFrom2->value();
+        double range3From = rangeFrom3->value();
+        double range1To = rangeTo1->value();
+        double range2To = rangeTo2->value();
+        double range3To = rangeTo3->value();
+
+        int steps = this->steps->text().toInt();
+        if(steps<=0)
+            return;
+        if(range1From<range1To || range2From>range2To || range3From<range3To)
+            return;
+        if(range1To>range3From)
+            return;
+        double step = (range3From - range1To)/steps;
+
+        for(double x = range1To; x<range1From; x+=step)
+            series->append(x, (1-7*x)*qSin((2*M_PI*x*10)/(x+0.04)));
+        for(double x = range2From; x<range2To; x+=step)
+            series->append(x, 0.63*x*qSin(125*x));
+        for(double x = range3To; x<=range3From; x+=step)
+            series->append(x, qPow(x, -0.662)+0.77*qSin(8*x));
+        break;
+    }
+    case Series::seriesP:
+    {
+        QVector<int> set = parsedNumberSet();
+        if(set.length()>0)
         {
-            double y=0;
-            for(int number=1; number<=set[2]; number++)
+            for(double x = rangeF; x<=rangeT; x+=step)
             {
-                y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+                double y=0;
+                for(int number=1; number<=set[0]; number++)
+                {
+                    y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+                }
+                series->append(x, y);
             }
-            seriesP3->append(x, y);
         }
+        if(set.length()>1)
+        {
+            for(double x = rangeF; x<=rangeT; x+=step)
+            {
+                double y=0;
+                for(int number=1; number<=set[1]; number++)
+                {
+                    y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+                }
+                seriesVec.at(type+1)->append(x, y);
+            }
+        }
+        if(set.length()>2)
+        {
+            for(double x = rangeF; x<=rangeT; x+=step)
+            {
+                double y=0;
+                for(int number=1; number<=set[2]; number++)
+                {
+                    y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+                }
+                seriesVec.at(type+2)->append(x, y);
+            }
+        }
+        break;
+    }
+    default:
+        return;
+
     }
 
     if(contains)
-        handlePselected(2);
+        handleSeriesSelectionChanged(2, type);
 }
