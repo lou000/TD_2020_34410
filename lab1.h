@@ -41,7 +41,6 @@ private:
 
     QVector<int> parsedIndex();
     QVector<int> parsedNumberSet();
-    void updateSeries(QLineSeries* series, Series type);
     double xFunction(double x, QVector<int> indexData);
     double yFunction(double x, QVector<int> indexData);
     double zFunction(double x, QVector<int> indexData);
