@@ -223,6 +223,7 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
                                                                   calculateSeries(Series::seriesY);
                                                                   calculateSeries(Series::seriesZ);
                                                                   calculateSeries(Series::seriesU);
+                                                                  calculateSeries(Series::seriesV);
                                                                   calculateSeries(Series::seriesP);});
 
     QObject::connect(rangeFrom1, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
@@ -435,7 +436,7 @@ void Lab1::calculateSeries(Series type)
         double range2To = rangeTo2->value();
         double range3To = rangeTo3->value();
 
-        int steps = this->steps->text().toInt();
+        int steps = this->steps->value();
         if(steps<=0)
             return;
         if(range1From<range1To || range2From>range2To || range3From<range3To)
