@@ -44,7 +44,9 @@ private:
     QLineSeries* seriesZ;
     QLineSeries* seriesU;
     QLineSeries* seriesV;
-    QLineSeries* seriesP;
+    QLineSeries* seriesP1;
+    QLineSeries* seriesP2;
+    QLineSeries* seriesP3;
 
     QCheckBox* chartX;
     QCheckBox* chartY;

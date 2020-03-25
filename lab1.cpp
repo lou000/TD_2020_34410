@@ -5,27 +5,35 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     //there is a lot of repetition here but i couldnt be bothered to refactor
     seriesX = new QLineSeries();
     seriesX->setName("X(t)");
-    seriesX->setColor(QColor("blue"));
+    seriesX->setColor(QColor("cornflowerblue"));
 
     seriesY = new QLineSeries();
-    seriesY->setColor(QColor("green"));
+    seriesY->setColor(QColor("palegreen"));
     seriesY->setName("Y(t)");
 
     seriesZ = new QLineSeries();
-    seriesZ->setColor(QColor("orange"));
+    seriesZ->setColor(QColor("peachpuff"));
     seriesZ->setName("Z(t)");
 
     seriesU = new QLineSeries();
-    seriesU->setColor(QColor("purple"));
+    seriesU->setColor(QColor("orchid"));
     seriesU->setName("Y(t)");
 
     seriesV = new QLineSeries();
-    seriesV->setColor(QColor("pink"));
+    seriesV->setColor(QColor("navajowhite"));
     seriesV->setName("V(t)");
 
-    seriesP = new QLineSeries();
-    seriesP->setColor(QColor("red"));
-    seriesP->setName("P(t)");
+    seriesP1 = new QLineSeries();
+    seriesP1->setColor(QColor("tomato"));
+    seriesP1->setName("P1(t)");
+
+    seriesP2 = new QLineSeries();
+    seriesP2->setColor(QColor("crimson"));
+    seriesP2->setName("P2(t)");
+
+    seriesP3 = new QLineSeries();
+    seriesP3->setColor(QColor("pink"));
+    seriesP3->setName("P3(t)");
 
     auto mainLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
     auto leftBarLayout = new QGridLayout();
@@ -38,7 +46,7 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     this->userIndex = new QSpinBox(this);
     this->userIndex->setAlignment(Qt::AlignRight);
     this->userIndex->setMaximum(999999);
-    this->userIndex->setValue(98099);
+    this->userIndex->setValue(34410);
     this->userIndex->setMaximumWidth(80);
     leftBarLayout->addWidget(new QLabel("Index:", this), 0, 0, 1, 2, Qt::AlignRight);
     leftBarLayout->addWidget(userIndex, 0, 2, 1, 2, Qt::AlignLeft);
@@ -93,7 +101,7 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     this->steps->setMaximumWidth(80);
     this->steps->setMaximum(999999);
     this->steps->setMinimum(1);
-    this->steps->setValue(22050);
+    this->steps->setValue(2000);
     rangeLayout->addWidget(new QLabel("Steps:", this), 1, 0, Qt::AlignLeft);
     rangeLayout->addWidget(steps, 1, 1, 1, 2, Qt::AlignLeft);
 
@@ -333,15 +341,19 @@ void Lab1::handleVselected(int selected)
 
 void Lab1::handlePselected(int selected)
 {
-    Q_ASSERT(seriesP);
+    Q_ASSERT(seriesP1 && seriesP2 && seriesP3);
     if(selected == 2)
     {
-        chartView->chart()->addSeries(seriesP);
+        chartView->chart()->addSeries(seriesP1);
+        chartView->chart()->addSeries(seriesP2);
+        chartView->chart()->addSeries(seriesP3);
         chartView->chart()->createDefaultAxes();
     }
     else
     {
-        chartView->chart()->removeSeries(seriesP);
+        chartView->chart()->removeSeries(seriesP1);
+        chartView->chart()->removeSeries(seriesP2);
+        chartView->chart()->removeSeries(seriesP3);
         auto series = chartView->chart()->series();
         for(auto item : series)
             chartView->chart()->removeSeries(item);
@@ -572,11 +584,38 @@ void Lab1::calculateP()
     double step = (rangeT - rangeF)/steps;
     Q_ASSERT(set.length()>=3);
 
-    bool contains = chartView->chart()->series().contains(seriesP);
+    bool contains = chartView->chart()->series().contains(seriesP1) ||
+                    chartView->chart()->series().contains(seriesP2) ||
+                    chartView->chart()->series().contains(seriesP3);
     if(contains)
-       chartView->chart()->removeSeries(seriesP);
+    {
+       chartView->chart()->removeSeries(seriesP1);
+       chartView->chart()->removeSeries(seriesP2);
+       chartView->chart()->removeSeries(seriesP3);
+    }
 
-    seriesP->clear();
+    seriesP1->clear();
+    seriesP2->clear();
+    seriesP3->clear();
+
+    for(double x = rangeF; x<=rangeT; x+=step)
+    {
+        double y=0;
+        for(int number=1; number<=set[0]; number++)
+        {
+            y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+        }
+        seriesP1->append(x, y);
+    }
+    for(double x = rangeF; x<=rangeT; x+=step)
+    {
+        double y=0;
+        for(int number=1; number<=set[1]; number++)
+        {
+            y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+        }
+        seriesP2->append(x, y);
+    }
     for(double x = rangeF; x<=rangeT; x+=step)
     {
         double y=0;
@@ -584,7 +623,7 @@ void Lab1::calculateP()
         {
             y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
         }
-        seriesP->append(x, y);
+        seriesP3->append(x, y);
     }
 
     if(contains)
