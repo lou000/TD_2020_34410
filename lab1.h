@@ -71,8 +71,6 @@ private:
 
     QPlainTextEdit* additionalOutput;
     QChartView* chartView;
-    QValueAxis* axisX;
-    QValueAxis* axisY;
 
 private slots:
     void handleSeriesSelectionChanged(int selection, Series type);
