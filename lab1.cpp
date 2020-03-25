@@ -233,7 +233,7 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     QObject::connect(rangeFrom3, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
     QObject::connect(rangeTo3, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
 
-    QObject::connect(numberSet, &QLineEdit::editingFinished, this, [=]{calculateSeries(Series::seriesV);});
+    QObject::connect(numberSet, &QLineEdit::editingFinished, this, [=]{calculateSeries(Series::seriesP);});
 
     calculateSeries(Series::seriesX);
     calculateSeries(Series::seriesY);
