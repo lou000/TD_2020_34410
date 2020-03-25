@@ -598,32 +598,41 @@ void Lab1::calculateP()
     seriesP2->clear();
     seriesP3->clear();
 
-    for(double x = rangeF; x<=rangeT; x+=step)
+    if(set.length()>0)
     {
-        double y=0;
-        for(int number=1; number<=set[0]; number++)
+        for(double x = rangeF; x<=rangeT; x+=step)
         {
-            y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+            double y=0;
+            for(int number=1; number<=set[0]; number++)
+            {
+                y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+            }
+            seriesP1->append(x, y);
         }
-        seriesP1->append(x, y);
     }
-    for(double x = rangeF; x<=rangeT; x+=step)
+    if(set.length()>1)
     {
-        double y=0;
-        for(int number=1; number<=set[1]; number++)
+        for(double x = rangeF; x<=rangeT; x+=step)
         {
-            y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+            double y=0;
+            for(int number=1; number<=set[1]; number++)
+            {
+                y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+            }
+            seriesP2->append(x, y);
         }
-        seriesP2->append(x, y);
     }
-    for(double x = rangeF; x<=rangeT; x+=step)
+    if(set.length()>2)
     {
-        double y=0;
-        for(int number=1; number<=set[2]; number++)
+        for(double x = rangeF; x<=rangeT; x+=step)
         {
-            y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+            double y=0;
+            for(int number=1; number<=set[2]; number++)
+            {
+                y += (qCos(12*x*number*number) + qCos(16*x*number))/(number*number);
+            }
+            seriesP3->append(x, y);
         }
-        seriesP3->append(x, y);
     }
 
     if(contains)
