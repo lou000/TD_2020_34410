@@ -32,13 +32,22 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     mainLayout->addLayout(leftBarLayout);
     leftBarLayout->setAlignment(Qt::AlignTop);
 
-    leftBarLayout->setVerticalSpacing(10);
+    leftBarLayout->setVerticalSpacing(5);
 
+    ///////////////////USER INDEX///////////////////
+    this->userIndex = new QSpinBox(this);
+    this->userIndex->setAlignment(Qt::AlignRight);
+    this->userIndex->setMaximum(999999);
+    this->userIndex->setValue(98099);
+    this->userIndex->setMaximumWidth(80);
+    leftBarLayout->addWidget(new QLabel("Index:", this), 0, 0, 1, 2, Qt::AlignRight);
+    leftBarLayout->addWidget(userIndex, 0, 2, 1, 2, Qt::AlignLeft);
 
     /////////////COMBO BOX FOR SELECTING CHARTS////////////////////
     auto charts = new QGroupBox("Charts", this);
     auto chartsLayout = new QGridLayout();
     charts->setMinimumWidth(200);
+    charts->setMaximumHeight(150);
     this->chartX = new QCheckBox("X(t)", this);
     this->chartY = new QCheckBox("Y(t)", this);
     this->chartZ = new QCheckBox("Z(t)", this);
@@ -52,26 +61,14 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     chartsLayout->addWidget(chartV, 1, 1, Qt::AlignHCenter);
     chartsLayout->addWidget(chartP, 1, 2, Qt::AlignHCenter);
     charts->setLayout(chartsLayout);
-    leftBarLayout->addWidget(charts, 0, 0, 1, 4, Qt::AlignHCenter);
+    leftBarLayout->addWidget(charts, 1, 0, 1, 4, Qt::AlignHCenter);
 
-    ///////////////////USER INDEX///////////////////
-    auto index = new QWidget(this);
-    index->setMinimumWidth(200);
-    auto indexLayout = new QGridLayout();
-    this->userIndex = new QSpinBox(this);
-    this->userIndex->setAlignment(Qt::AlignRight);
-    this->userIndex->setMaximum(999999);
-    this->userIndex->setValue(98099);
-    this->userIndex->setMaximumWidth(80);
-    indexLayout->addWidget(new QLabel("Index:", this), 0, 0, Qt::AlignRight);
-    indexLayout->addWidget(userIndex, 0, 1, Qt::AlignLeft);
-    index->setLayout(indexLayout);
-    leftBarLayout->addWidget(index, 1, 0, 1, 4, Qt::AlignHCenter);
 
     /////////////RANGE SELECTION GROUP/////////////
     auto range = new QGroupBox("Range", this);
     auto rangeLayout = new QGridLayout();
     range->setMinimumWidth(200);
+    range->setMaximumHeight(150);
 
     this->rangeFrom = new QDoubleSpinBox(this);
     this->rangeFrom->setAlignment(Qt::AlignRight);
@@ -107,6 +104,7 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     auto rangeV = new QGroupBox("Range for V(t) chart", this);
     auto rangeVLayout = new QGridLayout();
     rangeV->setMinimumWidth(200);
+    rangeV->setMaximumHeight(200);
     rangeVLayout->setSpacing(9);
 
     this->rangeFrom1 = new QDoubleSpinBox(this);
@@ -160,7 +158,7 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     /////////////////ADITIONAL OUTPUT/////////////////////////////////
     auto addOutput = new QGroupBox("Additional output", this);
     auto addOutputLayout = new QGridLayout();
-    addOutput->setMaximumSize(200,100);
+    addOutput->setMaximumSize(200,200);
     this->additionalOutput = new QPlainTextEdit("", this);
     this->additionalOutput->setReadOnly(true);
     addOutputLayout->addWidget(additionalOutput, 0, 0, Qt::AlignLeft);
