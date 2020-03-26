@@ -19,6 +19,7 @@ SOURCES += \
     external/DarkStyle.cpp \
     external/framelesswindow/framelesswindow.cpp \
     external/framelesswindow/windowdragger.cpp \
+    lab2.cpp \
     lab1.cpp \
     main.cpp \
     mainwindow.cpp
@@ -27,6 +28,7 @@ HEADERS += \
     external/DarkStyle.h \
     external/framelesswindow/framelesswindow.h \
     external/framelesswindow/windowdragger.h \
+    lab2.h \
     lab1.h \
     mainwindow.h
 

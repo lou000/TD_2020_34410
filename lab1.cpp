@@ -45,12 +45,27 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     seriesP3->setName("P3(t)");
     seriesVec.append(seriesP3);
 
-    auto mainLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    auto mainLayout = new QGridLayout(this);
     auto leftBarLayout = new QGridLayout();
-    mainLayout->addLayout(leftBarLayout);
-    leftBarLayout->setAlignment(Qt::AlignTop);
+    auto leftBarWidget = new QWidget();
+    leftBarWidget->setLayout(leftBarLayout);
+    leftBarWidget->setMinimumWidth(220);
+    leftBarWidget->setMaximumWidth(220);
 
+    leftBarLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     leftBarLayout->setVerticalSpacing(5);
+
+    mainLayout->addWidget(leftBarWidget,0,0,Qt::AlignLeft | Qt::AlignTop);
+
+    auto chart = new QChart();
+    chartView = new QChartView(chart, this);
+    chartView->setRenderHint(QPainter::Antialiasing);
+    chartView->chart()->setTheme(QChart::ChartThemeDark);
+    mainLayout->addWidget(chartView,0,2);
+
+    this->setLayout(mainLayout);
+
+
 
     ///////////////////USER INDEX///////////////////
     this->userIndex = new QSpinBox(this);
@@ -170,7 +185,7 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     this->numberSet->setAlignment(Qt::AlignRight);
     this->numberSet->setValidator(new QRegExpValidator(QRegExp("[0-9, ]*"), this));
     this->numberSet->setMaximumWidth(80);
-    leftBarLayout->addWidget(new QLabel("Set of numbers for P(t):", this), 4, 1, Qt::AlignLeft);
+    leftBarLayout->addWidget(new QLabel("Number set for P(t):", this), 4, 1, Qt::AlignLeft);
     leftBarLayout->addWidget(numberSet, 4, 2, Qt::AlignLeft);
 
     /////////////////ADITIONAL OUTPUT/////////////////////////////////
@@ -183,19 +198,6 @@ Lab1::Lab1(QWidget *parent) : QWidget(parent)
     addOutput->setLayout(addOutputLayout);
     leftBarLayout->addWidget(addOutput, 5, 0, 1, 4, Qt::AlignHCenter);
 
-
-    auto chart = new QChart();
-    auto axisX = new QValueAxis();
-    auto axisY = new QValueAxis();
-    chart->addAxis(axisX, Qt::AlignBottom);
-    chart->addAxis(axisY, Qt::AlignLeft);
-
-    chartView = new QChartView(chart, this);
-    chartView->setRenderHint(QPainter::Antialiasing);
-    mainLayout->addWidget(chartView);
-    this->setLayout(mainLayout);
-
-    chartView->chart()->setTheme(QChart::ChartThemeDark);
 
     QObject::connect(chartX, &QCheckBox::stateChanged, this, [=](int sel){handleSeriesSelectionChanged(sel, Series::seriesX);});
     QObject::connect(chartY, &QCheckBox::stateChanged, this, [=](int sel){handleSeriesSelectionChanged(sel, Series::seriesY);});
