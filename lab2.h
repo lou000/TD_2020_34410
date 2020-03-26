@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QObject>
 #include <QWidget>
 #include <QChartView>
@@ -13,6 +13,7 @@
 #include <QLabel>
 #include <QtMath>
 #include <QLineEdit>
+#include <QSlider>
 
 using namespace QtCharts;
 class Lab2 : public QWidget
@@ -31,9 +32,9 @@ private:
     QSpinBox* steps;
 
     //TODO: change QDoubleSpinBox to QSlider?
-    QDoubleSpinBox* amplitude;
-    QDoubleSpinBox* frequency;
-    QDoubleSpinBox* phaseShift;
+    QSlider* amplitude;
+    QSlider* frequency;
+    QSlider* phaseShift;
 
     QCheckBox* quantize;
     QLineEdit* quantizationResolution;

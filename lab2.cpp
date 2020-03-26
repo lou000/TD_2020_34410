@@ -1,4 +1,4 @@
-#include "lab2.h"
+﻿#include "lab2.h"
 
 Lab2::Lab2(QWidget *parent) : QWidget(parent)
 {
@@ -69,31 +69,46 @@ Lab2::Lab2(QWidget *parent) : QWidget(parent)
     vars->setMinimumWidth(200);
     vars->setMaximumHeight(150);
 
-    this->amplitude = new QDoubleSpinBox(this);
-    this->amplitude->setAlignment(Qt::AlignRight);
-    this->amplitude->setMaximumWidth(70);
-    this->amplitude->setMaximum(999);
-    this->amplitude->setMinimum(-999);
-    this->amplitude->setValue(1.0);
-    varsLayout->addWidget(new QLabel("Amplitude:", this), 0, 0, Qt::AlignRight);
+    this->amplitude = new QSlider(this);
+    this->amplitude->setOrientation(Qt::Horizontal);
+    this->amplitude->setMinimumWidth(105);
+    this->amplitude->setTickInterval(1);
+    this->amplitude->setMaximum(1000);
+    this->amplitude->setMinimum(-1000);
+    this->amplitude->setValue(100);
+    varsLayout->addWidget(new QLabel("A:", this), 0, 0, Qt::AlignLeft);
+    auto amplitudeLabel = new QLabel(QString::number(1),this);
+    varsLayout->addWidget(amplitudeLabel, 0, 2, Qt::AlignLeft);
+    QObject::connect(amplitude, &QSlider::sliderMoved, amplitudeLabel,
+                     [=](int pos){amplitudeLabel->setText(QString::number(static_cast<double>(pos)/100));});
     varsLayout->addWidget(amplitude, 0, 1, Qt::AlignLeft);
 
-    this->frequency = new QDoubleSpinBox(this);
-    this->frequency->setAlignment(Qt::AlignRight);
-    this->frequency->setMaximumWidth(70);
-    this->frequency->setMaximum(999);
-    this->frequency->setMinimum(-999);
-    this->frequency->setValue(1.0);
-    varsLayout->addWidget(new QLabel("Frequency:", this), 1, 0, Qt::AlignRight);
+    this->frequency = new QSlider(this);
+    this->frequency->setOrientation(Qt::Horizontal);
+    this->frequency->setMinimumWidth(105);
+    this->frequency->setTickInterval(1);
+    this->frequency->setMaximum(1000);
+    this->frequency->setMinimum(-1000);
+    this->frequency->setValue(100);
+    varsLayout->addWidget(new QLabel("f:", this), 1, 0, Qt::AlignLeft);
+    auto frequencyLabel = new QLabel(QString::number(1),this);
+    varsLayout->addWidget(frequencyLabel, 1, 2, Qt::AlignLeft);
+    QObject::connect(frequency, &QSlider::sliderMoved, frequencyLabel,
+                     [=](int pos){frequencyLabel->setText(QString::number(static_cast<double>(pos)/100));});
     varsLayout->addWidget(frequency, 1, 1, Qt::AlignLeft);
 
-    this->phaseShift = new QDoubleSpinBox(this);
-    this->phaseShift->setAlignment(Qt::AlignRight);
-    this->phaseShift->setMaximumWidth(70);
-    this->phaseShift->setMaximum(999);
-    this->phaseShift->setMinimum(-999);
-    this->phaseShift->setValue(4*M_PI);
-    varsLayout->addWidget(new QLabel("Phase Shift:", this), 2, 0, Qt::AlignRight);
+    this->phaseShift = new QSlider(this);
+    this->phaseShift->setOrientation(Qt::Horizontal);
+    this->phaseShift->setMinimumWidth(105);
+    this->phaseShift->setTickInterval(1);
+    this->phaseShift->setMaximum(1000);
+    this->phaseShift->setMinimum(-1000);
+    this->phaseShift->setValue(100);
+    varsLayout->addWidget(new QLabel("S:", this), 2, 0, Qt::AlignLeft);
+    auto phaseShiftLabel = new QLabel(QString::number(1),this);
+    varsLayout->addWidget(phaseShiftLabel, 2, 2, Qt::AlignLeft);
+    QObject::connect(phaseShift, &QSlider::sliderMoved, phaseShiftLabel,
+                     [=](int pos){phaseShiftLabel->setText(QString::number(static_cast<double>(pos)/100));});
     varsLayout->addWidget(phaseShift, 2, 1, Qt::AlignLeft);
 
     leftBarLayout->addWidget(vars, 3, 0 , 1, 4, Qt::AlignHCenter);
@@ -108,7 +123,7 @@ Lab2::Lab2(QWidget *parent) : QWidget(parent)
     this->quantize = new QCheckBox("Enable",this);
     quantLayout->addWidget(quantize,0,0,1,2,Qt::AlignHCenter);
 
-    this->quantizationResolution = new QLineEdit("2^16",this);
+    this->quantizationResolution = new QLineEdit("2^6",this);
     this->quantizationResolution->setAlignment(Qt::AlignRight);
     this->quantizationResolution->setValidator(new QRegExpValidator(QRegExp("[[0-9]\\^[0-9]{1,2}"), this));
     this->quantizationResolution->setMaximumWidth(80);
@@ -121,9 +136,9 @@ Lab2::Lab2(QWidget *parent) : QWidget(parent)
     QObject::connect(rangeTo, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries();});
     QObject::connect(steps, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries();});
 
-    QObject::connect(amplitude, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries();});
-    QObject::connect(frequency, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries();});
-    QObject::connect(phaseShift, &QSpinBox::editingFinished, this, [=]{calculateSeries();});
+    QObject::connect(amplitude, &QSlider::sliderMoved, this, [=]{calculateSeries();});
+    QObject::connect(frequency, &QSlider::sliderMoved, this, [=]{calculateSeries();});
+    QObject::connect(phaseShift, &QSlider::sliderMoved, this, [=]{calculateSeries();});
 
     QObject::connect(quantize, &QCheckBox::stateChanged, this, [=]{calculateSeries();});
     QObject::connect(quantizationResolution, &QLineEdit::editingFinished, this, [=]{calculateSeries();});
@@ -133,13 +148,15 @@ Lab2::Lab2(QWidget *parent) : QWidget(parent)
 
 void Lab2::calculateSeries()
 {
-    double amp = amplitude->value();
-    double freq = frequency->value();
-    double pShift = phaseShift->value();
+    double amp = static_cast<double>(amplitude->value())/100;
+    double freq = static_cast<double>(frequency->value())/100;
+    double pShift = static_cast<double>(phaseShift->value())/100;
     double rangeF = rangeFrom->value();
     double rangeT = rangeTo->value();
     double step = (rangeT-rangeF)/steps->value();
 
+    if(rangeF>=rangeT || step<=0)
+        return;
     if(chartView->chart()->series().contains(series))
         chartView->chart()->removeSeries(series);
     series->clear();
