@@ -10,8 +10,8 @@ class ZoomableChartView : public QChartView
 public:
     using QChartView::QChartView;
 
-    // QWidget interface
 protected:
+    //NOTE: this was far easier then expected
     void wheelEvent(QWheelEvent *event) override{
         QPoint numDegrees = event->angleDelta() / 8;
         QPoint numSteps = numDegrees;
@@ -21,7 +21,6 @@ protected:
             chart()->scroll(-(center.x()-mousePos.x())/6, (center.y()-mousePos.y())/6);
         else
             chart()->scroll((center.x()-mousePos.x())/6, -(center.y()-mousePos.y())/6);
-        qDebug()<<center.x()<<"-"<<mousePos.x();
         chart()->zoom(1+static_cast<double>(numSteps.y())/100);
         event->accept();
     }

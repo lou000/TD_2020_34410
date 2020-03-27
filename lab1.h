@@ -20,8 +20,6 @@
 #include <QPlainTextEdit>
 #include "zoomablechartview.h"
 
-//TODO add zooming, change default theme
-
 using namespace QtCharts;
 
 class Lab1 : public QWidget

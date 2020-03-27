@@ -32,7 +32,6 @@ private:
     QDoubleSpinBox* rangeTo;
     QSpinBox* steps;
 
-    //TODO: change QDoubleSpinBox to QSlider?
     QSlider* amplitude;
     QSlider* frequency;
     QSlider* phaseShift;

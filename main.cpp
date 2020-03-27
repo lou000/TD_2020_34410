@@ -6,6 +6,8 @@
 #include "external/DarkStyle.h"
 #include <QScreen>
 
+//TODO: add option to enable and disable auto adjusting axes
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
