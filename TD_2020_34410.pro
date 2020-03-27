@@ -31,7 +31,7 @@ HEADERS += \
     lab2.h \
     lab1.h \
     mainwindow.h \
-    zoomablechartview.h
+    qchartview_with_zoom_and_drag.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
