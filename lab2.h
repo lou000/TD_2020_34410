@@ -14,6 +14,7 @@
 #include <QtMath>
 #include <QLineEdit>
 #include <QSlider>
+#include "zoomablechartview.h"
 
 using namespace QtCharts;
 class Lab2 : public QWidget
@@ -25,7 +26,7 @@ private:
     void calculateSeries();
 
     QLineSeries* series;
-    QChartView* chartView;
+    ZoomableChartView* chartView;
 
     QDoubleSpinBox* rangeFrom;
     QDoubleSpinBox* rangeTo;

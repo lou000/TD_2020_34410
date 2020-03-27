@@ -30,7 +30,8 @@ HEADERS += \
     external/framelesswindow/windowdragger.h \
     lab2.h \
     lab1.h \
-    mainwindow.h
+    mainwindow.h \
+    zoomablechartview.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

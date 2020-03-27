@@ -18,6 +18,7 @@
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QPlainTextEdit>
+#include "zoomablechartview.h"
 
 //TODO add zooming, change default theme
 
@@ -70,7 +71,7 @@ private:
     QLineEdit* numberSet;
 
     QPlainTextEdit* additionalOutput;
-    QChartView* chartView;
+    ZoomableChartView* chartView;
 
 private slots:
     void handleSeriesSelectionChanged(int selection, Series type);
