@@ -1,39 +1,47 @@
 ﻿#pragma once
 #include <QObject>
 #include <QChartView>
-#include <QDebug>
+//THIS IS NOT THOROUGHLY TESTED
 
 using namespace QtCharts;
-class ZoomableChartView : public QChartView
+class QChartViewWithZoomAndDrag : public QChartView
 {
     Q_OBJECT
 public:
     using QChartView::QChartView;
 
 protected:
-    //NOTE: this was far easier then expected, zoomIn and zoomOut are still not equal!
+    //ZOOM
     void wheelEvent(QWheelEvent *event) override{
-        QPoint numDegrees = event->angleDelta() / 8;
-        QPoint numSteps = numDegrees;
+        //This is imperfect, there is still slight drift when zooming and zoomIn != zoomOut
+
+        //exclude area outside plot
+        QRectF plotArea = chart()->plotArea();
+        if(event->position().x()<plotArea.x() || event->position().y()<plotArea.y()
+            || event->position().x()>plotArea.x()+plotArea.width() ||event->position().y()>plotArea.y()+plotArea.height())
+            return;
         QPointF mousePos = event->position();
-        double zoomFactor = static_cast<double>(numSteps.y());
-        QPointF center = QPointF(chart()->rect().width()/2,chart()->rect().height()/2);
-        if(numSteps.y()>0)
-            chart()->scroll(-(center.x()-mousePos.x())/(abs(zoomFactor)/2), (center.y()-mousePos.y())/(abs(zoomFactor)/2));
-        else
-            chart()->scroll((center.x()-mousePos.x())/(abs(zoomFactor)/2), -(center.y()-mousePos.y())/(abs(zoomFactor)/2));
-        chart()->zoom(1+zoomFactor/100);
+        mousePos.setX(mousePos.x()-plotArea.x());
+        mousePos.setY(mousePos.y()-plotArea.y());
+
+        //scroll and zoom
+        qreal numDegrees = static_cast<qreal>(event->angleDelta().y())/8;
+        QPointF center = QPointF(plotArea.width()/2,plotArea.height()/2);
+        chart()->scroll((mousePos.x()-center.x())*(numDegrees/100), -(mousePos.y()-center.y())*(numDegrees/100));
+        chart()->zoom(1+numDegrees/100);
         event->accept();
     }
-
+    //DRAG
     void mouseMoveEvent(QMouseEvent *event) override
     {
         if(event->buttons().testFlag(Qt::LeftButton))
+        {
             chart()->scroll(-(event->x()-lastMousePos.x()), (event->y()-lastMousePos.y()));
+            event->accept();
+        }
         lastMousePos = event->pos();
     }
 
 private:
     QPoint lastMousePos = QPoint(0,0);
 };
-

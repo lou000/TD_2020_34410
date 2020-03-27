@@ -69,7 +69,7 @@ private:
     QLineEdit* numberSet;
 
     QPlainTextEdit* additionalOutput;
-    ZoomableChartView* chartView;
+    QChartViewWithZoomAndDrag* chartView;
 
 private slots:
     void handleSeriesSelectionChanged(int selection, Series type);

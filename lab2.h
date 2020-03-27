@@ -26,7 +26,7 @@ private:
     void calculateSeries();
 
     QLineSeries* series;
-    ZoomableChartView* chartView;
+    QChartViewWithZoomAndDrag* chartView;
 
     QDoubleSpinBox* rangeFrom;
     QDoubleSpinBox* rangeTo;

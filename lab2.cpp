@@ -19,7 +19,7 @@ Lab2::Lab2(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(leftBarWidget,0,0,Qt::AlignLeft | Qt::AlignTop);
 
     auto chart = new QChart();
-    chartView = new ZoomableChartView(chart, this);
+    chartView = new QChartViewWithZoomAndDrag(chart, this);
     chartView->setRenderHint(QPainter::Antialiasing);
     chartView->chart()->setTheme(QChart::ChartThemeDark);
     mainLayout->addWidget(chartView,0,2);
