@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <QObject>
 #include <QChartView>
-//THIS IS NOT THOROUGHLY TESTED
+//THIS WAS ONLY TESTED ON QLineSeries and default QChart settings
 
 using namespace QtCharts;
 class QChartViewWithZoomAndDrag : public QChartView
