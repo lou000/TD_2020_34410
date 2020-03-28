@@ -19,8 +19,8 @@ SOURCES += \
     external/DarkStyle.cpp \
     external/framelesswindow/framelesswindow.cpp \
     external/framelesswindow/windowdragger.cpp \
-    lab2.cpp \
-    lab1.cpp \
+    lab2/lab2.cpp \
+    lab1/lab1.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -28,8 +28,8 @@ HEADERS += \
     external/DarkStyle.h \
     external/framelesswindow/framelesswindow.h \
     external/framelesswindow/windowdragger.h \
-    lab2.h \
-    lab1.h \
+    lab2/lab2.h \
+    lab1/lab1.h \
     mainwindow.h \
     qchartview_with_zoom_and_drag.h
 

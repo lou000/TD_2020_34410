@@ -274,7 +274,7 @@ QVector<int> Lab1::parsedNumberSet()
     return temp;
 }
 
-double Lab1::xFunction(double x, QVector<int> indexData)
+double Lab1::xFunction(double x, QVector<int> indexData) //FEDCBA
 {
     Q_ASSERT(indexData.length()>=6);
     return indexData[0]*x*x+indexData[1]*x+indexData[2];
