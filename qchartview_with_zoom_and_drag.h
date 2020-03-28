@@ -13,7 +13,7 @@ public:
 protected:
     //ZOOM
     void wheelEvent(QWheelEvent *event) override{
-        //This is imperfect, there is still slight drift when zooming and zoomIn != zoomOut
+        //This is imperfect, there is still slight drift when zooming and zoomIn amount != zoomOut amount
 
         //exclude area outside plot
         QRectF plotArea = chart()->plotArea();
