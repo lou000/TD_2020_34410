@@ -14,7 +14,7 @@
 #include <QtMath>
 #include <QLineEdit>
 #include <QSlider>
-#include "zoomablechartview.h"
+#include "qchartview_with_zoom_and_drag.h"
 
 using namespace QtCharts;
 class Lab2 : public QWidget

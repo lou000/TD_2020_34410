@@ -18,7 +18,7 @@
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QPlainTextEdit>
-#include "zoomablechartview.h"
+#include "qchartview_with_zoom_and_drag.h"
 
 using namespace QtCharts;
 

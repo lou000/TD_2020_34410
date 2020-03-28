@@ -164,12 +164,12 @@ void Lab2::calculateSeries()
     {
         QStringList temp = quantizationResolution->text().split("^");
         Q_ASSERT(temp.length()==2);
-        int quantRes = pow(temp[0].toInt(), temp[1].toInt());
-        double resStep = 2*amp/quantRes;
+        int quantRes = pow(temp[0].toInt(), temp[1].toInt());//2^q
+        double resStep = 2*amp/quantRes;//2*A / 2^q
 
         for(double x = rangeF; x<=rangeT; x+=step)
         {
-            double y = amp*sin(2*M_PI*freq*x+pShift);
+            double y = amp*sin(2*M_PI*freq*x+pShift);//A*sin(2*pi*f+shift)
             y = qRound(y/resStep)*resStep;
             series->append(x,y);
         }
