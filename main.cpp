@@ -16,6 +16,8 @@ int main(int argc, char *argv[])
     MainWindow* window = new MainWindow();
     framelessWindow.setContent(window);
     framelessWindow.setWindowTitle(window->windowTitle());
+    QFont font = QFont("Calibri", 10);
+    a.setFont(font);
     QScreen* mainScreen = QApplication::screens().at(0);
     int x = (mainScreen->size().width()-window->width()) / 2;
     int y = (mainScreen->size().height()-window->height()) / 2;

@@ -21,6 +21,7 @@ SOURCES += \
     external/framelesswindow/windowdragger.cpp \
     lab2/lab2.cpp \
     lab1/lab1.cpp \
+    lab3/lab3.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -30,6 +31,7 @@ HEADERS += \
     external/framelesswindow/windowdragger.h \
     lab2/lab2.h \
     lab1/lab1.h \
+    lab3/lab3.h \
     mainwindow.h \
     qchartview_with_zoom_and_drag.h
 
