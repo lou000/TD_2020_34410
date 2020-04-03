@@ -37,6 +37,7 @@ Lab3::Lab3(QWidget *parent) : QWidget(parent)
     funcSelection->addItem("P1(t)");
     funcSelection->addItem("P2(t)");
     funcSelection->addItem("P3(t)");
+    funcSelection->setMinimumWidth(150);
     leftBarLayout->addWidget(funcSelection, 0, 0, 1, 4, Qt::AlignHCenter);
 
     /////////////RANGE SELECTION GROUP/////////////
@@ -229,6 +230,11 @@ void Lab3::calculateSeries(std::function<double(double)> foo)
         return;
     if(chartView->chart()->series().contains(series))
         chartView->chart()->removeSeries(series);
+    if(series->name()!=funcSelection->currentText())
+    {
+        series->setName(funcSelection->currentText());
+        series->setColor(QColor::fromRgb(QRandomGenerator::global()->generate()));
+    }
     series->clear();
     if(spectrum->checkState()==2)
     {

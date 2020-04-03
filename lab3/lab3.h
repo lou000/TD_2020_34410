@@ -18,6 +18,7 @@
 #include <complex>
 #include <QComboBox>
 #include <qdebug.h>
+#include <QRandomGenerator>
 
 using namespace QtCharts;
 class Lab3 : public QWidget
