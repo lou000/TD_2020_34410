@@ -30,6 +30,7 @@ private:
     void selectedSeries(int selection);
     void calculateSeries(std::function<double(double)> foo);
     QVector<std::complex<double>> calculateDFT(QVector<double> x);
+    QVector<double> reverseDFT(QVector<std::complex<double>> dft);
     double sFunction(double x);
     double xFunction(double x);
     double yFunction(double x);
@@ -54,6 +55,7 @@ private:
     QSlider* phaseShift;
 
     QCheckBox* spectrum;
+    QCheckBox* reverse;
     QCheckBox* DBscale;
     QCheckBox* shift;
     QCheckBox* normalize;

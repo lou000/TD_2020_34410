@@ -134,7 +134,9 @@ Lab3::Lab3(QWidget *parent) : QWidget(parent)
     spectrumSettings->setMinimumWidth(200);
     spectrumSettings->setMaximumHeight(150);
 
-    this->spectrum = new QCheckBox("Enable", this);
+    this->spectrum = new QCheckBox("Enable DFT", this);
+    this->reverse = new QCheckBox("Reverse DFT", this);
+    reverse->setDisabled(true);
     this->DBscale = new QCheckBox("Decibal Scale", this);
     DBscale->setDisabled(true);
     this->shift = new QCheckBox("Shift", this);
@@ -143,9 +145,11 @@ Lab3::Lab3(QWidget *parent) : QWidget(parent)
     normalize->setDisabled(true);
 
     ssLayout->addWidget(spectrum,0,0,Qt::AlignLeft);
-    ssLayout->addWidget(DBscale,0,1,Qt::AlignLeft);
+    ssLayout->addWidget(reverse,0,1,Qt::AlignLeft);
     ssLayout->addWidget(shift,1,0,Qt::AlignLeft);
-    ssLayout->addWidget(normalize,1,1,Qt::AlignLeft);
+    ssLayout->addWidget(DBscale,1,1,Qt::AlignLeft);
+    ssLayout->addWidget(normalize,2,0,Qt::AlignLeft);
+
 
     leftBarLayout->addWidget(spectrumSettings, 4, 0, 1, 4, Qt::AlignHCenter);
 
@@ -167,17 +171,20 @@ Lab3::Lab3(QWidget *parent) : QWidget(parent)
                 DBscale->setDisabled(false);
                 shift->setDisabled(false);
                 normalize->setDisabled(false);
+                reverse->setDisabled(false);
             }
             else
             {
                 DBscale->setDisabled(true);
                 shift->setDisabled(true);
                 normalize->setDisabled(true);
+                reverse->setDisabled(true);
             }
          });
     QObject::connect(DBscale, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
     QObject::connect(shift, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
     QObject::connect(normalize, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(reverse, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
 
     selectedSeries(0);
 }
@@ -253,21 +260,32 @@ void Lab3::calculateSeries(std::function<double(double)> foo)
                 results.append(temp);
             }
         }
-        for(int k = 0; k<results.length(); k++)
+        if(reverse->checkState()==2)
         {
-            double y = abs(results.at(k));
-            if(DBscale->checkState()==2)
+            auto revResults = reverseDFT(results);
+            for(double x = rangeF; x<=rangeT; x+=step)
             {
-                y = 10*log10(y);
+                series->append(x,revResults.at(qRound(x/step)));
             }
-            if(normalize->checkState()==2)
+        }
+        else
+        {
+            for(int k = 0; k<results.length(); k++)
             {
-                y = y/(stepsVal/2);
+                double y = abs(results.at(k));
+                if(DBscale->checkState()==2)
+                {
+                    y = 10*log10(y);
+                }
+                if(normalize->checkState()==2)
+                {
+                    y = y/(stepsVal/2);
+                }
+                double x=(k*(fs/stepsVal));
+                if(shift->checkState()==2)
+                    x-=fs/2;
+                series->append(x, y);
             }
-            double x=(k*(fs/stepsVal));
-            if(shift->checkState()==2)
-                x-=fs/2;
-            series->append(x, y);
         }
     }
     else
@@ -297,6 +315,23 @@ QVector<std::complex<double>> Lab3::calculateDFT(QVector<double> signal)
             sum+=signal.at(n)*w;
         }
         temp.append(sum);
+    }
+    return temp;
+}
+
+QVector<double> Lab3::reverseDFT(QVector<std::complex<double> > dft)
+{
+    int steps = dft.length();
+    QVector<double> temp;
+    for(int n = 0; n<steps; n++)
+    {
+        double sum = 0;
+        for(int k = 0; k<steps; k++)
+        {
+            double phase = (2*M_PI*k*n) / steps;
+            sum += cos(phase) * dft[k].real() - sin(phase) * dft[k].imag();
+        }
+        temp.append(sum/steps);
     }
     return temp;
 }
