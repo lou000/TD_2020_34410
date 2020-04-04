@@ -136,9 +136,9 @@ Lab2::Lab2(QWidget *parent) : QWidget(parent)
     QObject::connect(rangeTo, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries();});
     QObject::connect(steps, &QDoubleSpinBox::editingFinished, this, [=]{calculateSeries();});
 
-    QObject::connect(amplitude, &QSlider::sliderMoved, this, [=]{calculateSeries();});
-    QObject::connect(frequency, &QSlider::sliderMoved, this, [=]{calculateSeries();});
-    QObject::connect(phaseShift, &QSlider::sliderMoved, this, [=]{calculateSeries();});
+    QObject::connect(amplitude, &QSlider::valueChanged, this, [=]{calculateSeries();});
+    QObject::connect(frequency, &QSlider::valueChanged, this, [=]{calculateSeries();});
+    QObject::connect(phaseShift, &QSlider::valueChanged, this, [=]{calculateSeries();});
 
     QObject::connect(quantize, &QCheckBox::stateChanged, this, [=]{calculateSeries();});
     QObject::connect(quantizationResolution, &QLineEdit::editingFinished, this, [=]{calculateSeries();});

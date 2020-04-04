@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QObject>
 #include <QWidget>
 #include <QChartView>
@@ -19,6 +19,7 @@
 #include <QComboBox>
 #include <qdebug.h>
 #include <QRandomGenerator>
+#include <QLogValueAxis>
 
 using namespace QtCharts;
 class Lab3 : public QWidget

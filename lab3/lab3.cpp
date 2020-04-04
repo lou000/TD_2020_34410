@@ -294,8 +294,6 @@ void Lab3::calculateSeries(std::function<double(double)> foo)
                 double y = abs(results.at(k));
                 double x = (k*(fs/stepsVal));
 
-                if(DBscale->checkState()==2)
-                    y = 10*log10(y);
                 if(normalize->checkState()==2)
                     y = y/(stepsVal/2);
                 if(shift->checkState()==2)
@@ -315,6 +313,20 @@ void Lab3::calculateSeries(std::function<double(double)> foo)
 
     chartView->chart()->addSeries(series);
     chartView->chart()->createDefaultAxes();
+
+    if(DBscale->checkState()==2)
+    {
+        QLogValueAxis* axis = new QLogValueAxis(this);
+        axis->setBase(10);
+        auto temp = chartView->chart()->axes(Qt::Vertical);
+        for(auto a : temp)
+        {
+            chartView->chart()->removeAxis(a);
+            a->deleteLater();
+        }
+        chartView->chart()->addAxis(axis, Qt::AlignLeft);
+        series->attachAxis(axis);
+    }
 }
 
 QVector<std::complex<double>> Lab3::calculateDFT(QVector<double> signal)
