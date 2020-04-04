@@ -1,4 +1,4 @@
-#include "lab3.h"
+﻿#include "lab3.h"
 
 Lab3::Lab3(QWidget *parent) : QWidget(parent)
 {
@@ -159,19 +159,24 @@ Lab3::Lab3(QWidget *parent) : QWidget(parent)
     QObject::connect(rangeTo, &QDoubleSpinBox::editingFinished, this, [=]{selectedSeries(funcSelection->currentIndex());});
     QObject::connect(steps, &QDoubleSpinBox::editingFinished, this, [=]{selectedSeries(funcSelection->currentIndex());});
 
-    QObject::connect(amplitude, &QSlider::sliderMoved, this, [=]{selectedSeries(funcSelection->currentIndex());});
-    QObject::connect(frequency, &QSlider::sliderMoved, this, [=]{selectedSeries(funcSelection->currentIndex());});
-    QObject::connect(phaseShift, &QSlider::sliderMoved, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(amplitude, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(frequency, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(phaseShift, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
 
     QObject::connect(spectrum, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
     QObject::connect(spectrum, &QCheckBox::stateChanged, this, [=](int state)
          {
             if(state==2)
             {
-                DBscale->setDisabled(false);
-                shift->setDisabled(false);
-                normalize->setDisabled(false);
-                reverse->setDisabled(false);
+                if(reverse->checkState()==2)
+                    reverse->setDisabled(false);
+                else
+                {
+                    DBscale->setDisabled(false);
+                    shift->setDisabled(false);
+                    normalize->setDisabled(false);
+                    reverse->setDisabled(false);
+                }
             }
             else
             {
@@ -179,6 +184,21 @@ Lab3::Lab3(QWidget *parent) : QWidget(parent)
                 shift->setDisabled(true);
                 normalize->setDisabled(true);
                 reverse->setDisabled(true);
+            }
+         });
+    QObject::connect(reverse, &QCheckBox::stateChanged, this, [=](int state)
+         {
+            if(state==2)
+            {
+                DBscale->setDisabled(true);
+                shift->setDisabled(true);
+                normalize->setDisabled(true);
+            }
+            else
+            {
+                DBscale->setDisabled(false);
+                shift->setDisabled(false);
+                normalize->setDisabled(false);
             }
          });
     QObject::connect(DBscale, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
@@ -252,14 +272,13 @@ void Lab3::calculateSeries(std::function<double(double)> foo)
         }
         QVector<std::complex<double>> results = calculateDFT(temp);
         if(shift->checkState()==2)
-        {
             for(int i=0;i<=results.length()/2;i++)
             {
                 auto temp = results.front();
                 results.pop_front();
                 results.append(temp);
             }
-        }
+
         if(reverse->checkState()==2)
         {
             auto revResults = reverseDFT(results);
@@ -273,17 +292,15 @@ void Lab3::calculateSeries(std::function<double(double)> foo)
             for(int k = 0; k<results.length(); k++)
             {
                 double y = abs(results.at(k));
+                double x = (k*(fs/stepsVal));
+
                 if(DBscale->checkState()==2)
-                {
                     y = 10*log10(y);
-                }
                 if(normalize->checkState()==2)
-                {
                     y = y/(stepsVal/2);
-                }
-                double x=(k*(fs/stepsVal));
                 if(shift->checkState()==2)
                     x-=fs/2;
+
                 series->append(x, y);
             }
         }
