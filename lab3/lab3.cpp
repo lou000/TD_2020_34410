@@ -3,8 +3,6 @@
 Lab3::Lab3(QWidget *parent) : QWidget(parent)
 {
     this->series = new QLineSeries(this);
-    this->series->setColor(QColor("orchid"));
-    this->series->setName("S(t)");
 
     auto mainLayout = new QGridLayout(this);
     auto leftBarLayout = new QGridLayout();
@@ -19,9 +17,9 @@ Lab3::Lab3(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(leftBarWidget,0,0,Qt::AlignLeft | Qt::AlignTop);
 
     auto chart = new QChart();
-    chartView = new QChartViewWithZoomAndDrag(chart, this);
-    chartView->setRenderHint(QPainter::Antialiasing);
-    chartView->chart()->setTheme(QChart::ChartThemeDark);
+    this->chartView = new QChartViewWithZoomAndDrag(chart, this);
+    this->chartView->setRenderHint(QPainter::Antialiasing);
+    this->chartView->chart()->setTheme(QChart::ChartThemeDark);
     mainLayout->addWidget(chartView,0,2);
 
     this->setLayout(mainLayout);
@@ -149,7 +147,6 @@ Lab3::Lab3(QWidget *parent) : QWidget(parent)
     ssLayout->addWidget(shift,1,0,Qt::AlignLeft);
     ssLayout->addWidget(DBscale,1,1,Qt::AlignLeft);
     ssLayout->addWidget(normalize,2,0,Qt::AlignLeft);
-
 
     leftBarLayout->addWidget(spectrumSettings, 4, 0, 1, 4, Qt::AlignHCenter);
 

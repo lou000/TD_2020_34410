@@ -28,19 +28,20 @@ class Lab3 : public QWidget
 public:
     explicit Lab3(QWidget *parent = nullptr);
 private:
+    static QVector<std::complex<double>> calculateDFT(QVector<double> x);
+    static QVector<double> reverseDFT(QVector<std::complex<double>> dft);
+    static double xFunction(double x);
+    static double yFunction(double x);
+    static double zFunction(double x);
+    static double uFunction(double x);
+    static double vFunction(double x);
+    static double p1Function(double x);
+    static double p2Function(double x);
+    static double p3Function(double x);
+
     void selectedSeries(int selection);
     void calculateSeries(std::function<double(double)> foo);
-    QVector<std::complex<double>> calculateDFT(QVector<double> x);
-    QVector<double> reverseDFT(QVector<std::complex<double>> dft);
     double sFunction(double x);
-    double xFunction(double x);
-    double yFunction(double x);
-    double zFunction(double x);
-    double uFunction(double x);
-    double vFunction(double x);
-    double p1Function(double x);
-    double p2Function(double x);
-    double p3Function(double x);
 
     QLineSeries* series;
     QChartViewWithZoomAndDrag* chartView;
