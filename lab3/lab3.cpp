@@ -338,9 +338,8 @@ QVector<std::complex<double>> Lab3::calculateDFT(QVector<double> signal)
         std::complex<double> sum(0,0);
         for(int n = 0; n<steps; n++)
         {
-            double real = cos((((2*M_PI)/steps)*k*n));
-            double imag = -sin((((2*M_PI)/steps)*k*n));
-            std::complex<double> w(real, imag);
+            double phase = (2*M_PI*k*n)/steps;
+            std::complex<double> w(cos(phase), -sin(phase));
             sum+=signal.at(n)*w;
         }
         temp.append(sum);
@@ -357,7 +356,7 @@ QVector<double> Lab3::reverseDFT(QVector<std::complex<double> > dft)
         double sum = 0;
         for(int k = 0; k<steps; k++)
         {
-            double phase = (2*M_PI*k*n) / steps;
+            double phase = (2*M_PI*k*n)/steps;
             sum += cos(phase) * dft[k].real() - sin(phase) * dft[k].imag();
         }
         temp.append(sum/steps);
