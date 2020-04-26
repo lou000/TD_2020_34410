@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QObject>
 #include <QWidget>
@@ -62,6 +62,7 @@ public:
     QCheckBox* dbScale;
     QCheckBox* shift;
     QCheckBox* normalize;
+    QCheckBox* zeroHighestVal;
     QSlider* bandwidthFreq;
 };
 

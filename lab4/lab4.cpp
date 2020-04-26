@@ -1,4 +1,4 @@
-#include "lab4.h"
+﻿#include "lab4.h"
 
 Lab4::Lab4(QWidget *parent) : QWidget(parent)
 {
@@ -193,7 +193,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     auto ssLayout = new QGridLayout();
     spectrumSettings->setLayout(ssLayout);
     spectrumSettings->setMinimumWidth(200);
-    spectrumSettings->setMaximumHeight(150);
+    spectrumSettings->setMaximumHeight(200);
 
     this->spectrum = new QCheckBox("Enable DFT", this);
     this->reverse = new QCheckBox("Reverse DFT", this);
@@ -206,6 +206,8 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     shift->setDisabled(true);
     this->normalize = new QCheckBox("Normalize", this);
     normalize->setDisabled(true);
+    this->zeroHighestVal = new QCheckBox("Zero Y Axis", this);
+    zeroHighestVal->setDisabled(true);
 
     this->bandwidthFreq = new QSlider(this);
     this->bandwidthFreq->setOrientation(Qt::Horizontal);
@@ -214,12 +216,12 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     this->bandwidthFreq->setMaximum(0);
     this->bandwidthFreq->setMinimum(-5000);
     this->bandwidthFreq->setValue(-300);
-    ssLayout->addWidget(new QLabel("Bandwidth Freq:", this), 3, 0,1,2, Qt::AlignLeft);
+    ssLayout->addWidget(new QLabel("Bandwidth Freq:", this), 4, 0,1,2, Qt::AlignLeft);
     auto bFreqLabel = new QLabel(QString::number(static_cast<double>(bandwidthFreq->value())/100),this);
-    ssLayout->addWidget(bFreqLabel, 4, 1, 1, 2, Qt::AlignRight);
+    ssLayout->addWidget(bFreqLabel, 5, 1, 1, 2, Qt::AlignRight);
     QObject::connect(bandwidthFreq, &QSlider::sliderMoved, bFreqLabel,
                      [=](int pos){bFreqLabel->setText(QString::number(static_cast<double>(pos)/100));});
-    ssLayout->addWidget(bandwidthFreq, 4, 0, 1, 2, Qt::AlignLeft);
+    ssLayout->addWidget(bandwidthFreq, 5, 0, 1, 2, Qt::AlignLeft);
 
     ssLayout->addWidget(spectrum,0,0,Qt::AlignLeft);
     ssLayout->addWidget(reverse,0,1,Qt::AlignLeft);
@@ -227,6 +229,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     ssLayout->addWidget(logYScale,1,1,Qt::AlignLeft);
     ssLayout->addWidget(dbScale,2,1,Qt::AlignLeft);
     ssLayout->addWidget(normalize,2,0,Qt::AlignLeft);
+    ssLayout->addWidget(zeroHighestVal,3,0,Qt::AlignLeft);
     leftBarLayout->addWidget(spectrumSettings, 6, 0, 1, 4, Qt::AlignHCenter);
 
     QObject::connect(funcSelection, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int v){selectedSeries(v);});
@@ -281,6 +284,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
                                  shift->setDisabled(false);
                                  normalize->setDisabled(false);
                                  reverse->setDisabled(false);
+                                 zeroHighestVal->setDisabled(false);
                              }
                          }
                          else
@@ -290,6 +294,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
                              shift->setDisabled(true);
                              normalize->setDisabled(true);
                              reverse->setDisabled(true);
+                             zeroHighestVal->setDisabled(true);
                          }
                      });
     QObject::connect(reverse, &QCheckBox::stateChanged, this, [=](int state)
@@ -300,6 +305,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
                              dbScale->setDisabled(true);
                              shift->setDisabled(true);
                              normalize->setDisabled(true);
+                             zeroHighestVal->setDisabled(true);
                          }
                          else
                          {
@@ -307,6 +313,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
                              dbScale->setDisabled(false);
                              shift->setDisabled(false);
                              normalize->setDisabled(false);
+                             zeroHighestVal->setDisabled(false);
                          }
                      });
     QObject::connect(logYScale, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
@@ -315,10 +322,12 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
                          if(state==2)
                          {
                              dbScale->setDisabled(true);
+                             zeroHighestVal->setDisabled(true);
                          }
                          else
                          {
                              dbScale->setDisabled(false);
+                             zeroHighestVal->setDisabled(false);
                          }
                      });
     QObject::connect(dbScale, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
@@ -337,6 +346,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     QObject::connect(normalize, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
     QObject::connect(reverse, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
     QObject::connect(bandwidthFreq, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(zeroHighestVal, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
 
     selectedSeries(0);
 }
@@ -430,6 +440,7 @@ void Lab4::calculateSeries(std::function<double (double)> foo)
     }
     if(spectrum->checkState()==2)
     {
+        double max = -INFINITY;
         QVector<std::complex<double>> results = Lab3::calculateDFT(yVec);
         if(shift->checkState()==2)
             for(int i=0;i<=results.length()/2;i++)
@@ -456,22 +467,24 @@ void Lab4::calculateSeries(std::function<double (double)> foo)
                     y = y/(stepsVal/2);
                 if(shift->checkState()==2)
                     x-=fs/2;
-
+                if(dbScale->checkState()==2)
+                    y = 10*log10(y);
                 yVec.append(y);
                 xVec.append(x);
+                if(y>max)
+                    max=y;
             }
         }
-    }
-    for(int i=0; i<xVec.length() && i<yVec.length(); i++)
-    {
-        if(dbScale->checkState()==2)
+        if(zeroHighestVal->checkState()==2)
         {
-            yVec[i] = 10*log10(yVec.at(i));
-            series->append(xVec.at(i), yVec.at(i));
+            for(auto& y : yVec)
+                y-=max;
         }
-        else
-            series->append(xVec.at(i), yVec.at(i));
     }
+
+    for(int i=0; i<xVec.length() && i<yVec.length(); i++)
+        series->append(xVec.at(i), yVec.at(i));
+
     chartView->chart()->addSeries(series);
     chartView->chart()->createDefaultAxes();
 
@@ -496,8 +509,17 @@ void Lab4::calculateSeries(std::function<double (double)> foo)
         axis->setMin(xVec.first());
         axis->setMax(xVec.last());
         axis->setStartValue(minMax.first);
-        axis->append(QString::number(minMax.second-minMax.first,'f',2), minMax.second);
+        QPen pen;
+        pen.setColor("indianred");
+        pen.setWidth(2);
+        axis->setGridLinePen(pen);
+        axis->append("Bandwidth: "+QString::number(minMax.second-minMax.first,'f',2), minMax.second);
         chartView->chart()->addAxis(axis, Qt::AlignBottom);
+        auto temp = (QValueAxis*)chartView->chart()->axes(Qt::Vertical).at(0);
+        QValueAxis* help = new QValueAxis(this);
+        help->setRange(temp->min(), temp->max());
+        help->setLabelFormat(" ");
+        chartView->chart()->addAxis(help, Qt::AlignRight);
     }
 }
 QPair<double, double> Lab4::calculateBandwidth(QVector<double> yVal, QVector<double>xVal, double dec)
@@ -518,6 +540,10 @@ QPair<double, double> Lab4::calculateBandwidth(QVector<double> yVal, QVector<dou
             }
         }
     }
+    if(min==0)
+        max=0;
+    if(max==0)
+        min=0;
     return QPair<double, double>(min, max);
 }
 
