@@ -27,7 +27,6 @@ class Lab3 : public QWidget
     Q_OBJECT
 public:
     explicit Lab3(QWidget *parent = nullptr);
-private:
     static QVector<std::complex<double>> calculateDFT(QVector<double> x);
     static QVector<double> reverseDFT(QVector<std::complex<double>> dft);
     static double xFunction(double x);
@@ -39,6 +38,7 @@ private:
     static double p2Function(double x);
     static double p3Function(double x);
 
+private:
     void selectedSeries(int selection);
     void calculateSeries(std::function<double(double)> foo);
     double sFunction(double x);

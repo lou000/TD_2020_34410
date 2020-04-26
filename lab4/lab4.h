@@ -18,6 +18,7 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QComboBox>
+#include <QCategoryAxis>
 
 #include "qchartview_with_zoom_and_drag.h"
 #include "lab3/lab3.h"
@@ -27,8 +28,9 @@ class Lab4 : public QWidget
     Q_OBJECT
 public:
     explicit Lab4(QWidget *parent = nullptr);
-    static QVector<double> modulateAmplitude(QVector<double> x, double modFreq, double modAmp);
-    static QVector<double> modulatePhase(QVector<double> x, double modFreq, double modAmp);
+    static double modulateAmplitude(std::function<double(double)> foo, double x, double modFreq, double kA);
+    static double modulatePhase(std::function<double(double)> foo, double x, double modFreq, double kP);
+    static QPair<double, double> calculateBandwidth(QVector<double> yVal, QVector<double>xVal, double dec);
 
     void selectedSeries(int selection);
     void calculateSeries(std::function<double(double)> foo);
@@ -48,6 +50,8 @@ public:
 
     QSlider* modAmplitude;
     QSlider* modFrequency;
+    QSlider* modKa;
+    QSlider* modKp;
 
     QCheckBox* modAmpl;
     QCheckBox* modPhase;
@@ -55,7 +59,9 @@ public:
     QCheckBox* spectrum;
     QCheckBox* reverse;
     QCheckBox* logYScale;
+    QCheckBox* dbScale;
     QCheckBox* shift;
     QCheckBox* normalize;
+    QSlider* bandwidthFreq;
 };
 

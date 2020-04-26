@@ -57,7 +57,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     this->rangeTo->setMaximumWidth(50);
     this->rangeTo->setMaximum(999);
     this->rangeTo->setMinimum(-999);
-    this->rangeTo->setValue(114.0);
+    this->rangeTo->setValue(3.0);
     rangeLayout->addWidget(new QLabel("To:", this), 0, 2, Qt::AlignRight);
     rangeLayout->addWidget(rangeTo, 0, 3, Qt::AlignLeft);
 
@@ -83,9 +83,9 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     this->amplitude->setOrientation(Qt::Horizontal);
     this->amplitude->setMinimumWidth(105);
     this->amplitude->setTickInterval(1);
-    this->amplitude->setMaximum(1000);
-    this->amplitude->setMinimum(-1000);
-    this->amplitude->setValue(100);
+    this->amplitude->setMaximum(200);
+    this->amplitude->setMinimum(0);
+    this->amplitude->setValue(50);
     varsLayout->addWidget(new QLabel("A:", this), 0, 0, Qt::AlignLeft);
     auto amplitudeLabel = new QLabel(QString::number(static_cast<double>(amplitude->value())/100),this);
     varsLayout->addWidget(amplitudeLabel, 0, 2, Qt::AlignLeft);
@@ -98,8 +98,8 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     this->frequency->setMinimumWidth(105);
     this->frequency->setTickInterval(1);
     this->frequency->setMaximum(1000);
-    this->frequency->setMinimum(-1000);
-    this->frequency->setValue(200);
+    this->frequency->setMinimum(0);
+    this->frequency->setValue(50);
     varsLayout->addWidget(new QLabel("f:", this), 1, 0, Qt::AlignLeft);
     auto frequencyLabel = new QLabel(QString::number(frequency->value()/100),this);
     varsLayout->addWidget(frequencyLabel, 1, 2, Qt::AlignLeft);
@@ -109,7 +109,7 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
 
     leftBarLayout->addWidget(vars, 3, 0 , 1, 4, Qt::AlignHCenter);
 
-    //////////////SIGNAL VARIABLES/////////////////////
+    //////////////MODULATION VARIABLES/////////////////////
     auto varsMod = new QGroupBox("Modulation Variables",this);
     auto varsModLayout = new QGridLayout();
     varsMod->setLayout(varsModLayout);
@@ -121,8 +121,8 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     this->modAmplitude->setMinimumWidth(105);
     this->modAmplitude->setTickInterval(1);
     this->modAmplitude->setMaximum(1000);
-    this->modAmplitude->setMinimum(-1000);
-    this->modAmplitude->setValue(100);
+    this->modAmplitude->setMinimum(0);
+    this->modAmplitude->setValue(400);
     varsModLayout->addWidget(new QLabel("A:", this), 0, 0, Qt::AlignLeft);
     auto amplitudeModLabel = new QLabel(QString::number(static_cast<double>(amplitude->value())/100),this);
     varsModLayout->addWidget(amplitudeModLabel, 0, 2, Qt::AlignLeft);
@@ -134,15 +134,43 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     this->modFrequency->setOrientation(Qt::Horizontal);
     this->modFrequency->setMinimumWidth(105);
     this->modFrequency->setTickInterval(1);
-    this->modFrequency->setMaximum(1000);
-    this->modFrequency->setMinimum(-1000);
-    this->modFrequency->setValue(200);
+    this->modFrequency->setMaximum(10000);
+    this->modFrequency->setMinimum(0);
+    this->modFrequency->setValue(5000);
     varsModLayout->addWidget(new QLabel("f:", this), 1, 0, Qt::AlignLeft);
-    auto frequencyModLabel = new QLabel(QString::number(modFrequency->value()/100),this);
+    auto frequencyModLabel = new QLabel(QString::number(static_cast<double>(modFrequency->value())/100),this);
     varsModLayout->addWidget(frequencyModLabel, 1, 2, Qt::AlignLeft);
     QObject::connect(modFrequency, &QSlider::sliderMoved, frequencyModLabel,
                      [=](int pos){frequencyModLabel->setText(QString::number(static_cast<double>(pos)/100));});
     varsModLayout->addWidget(modFrequency, 1, 1, Qt::AlignLeft);
+
+    this->modKa = new QSlider(this);
+    this->modKa->setOrientation(Qt::Horizontal);
+    this->modKa->setMinimumWidth(105);
+    this->modKa->setTickInterval(1);
+    this->modKa->setMaximum(5000);
+    this->modKa->setMinimum(0);
+    this->modKa->setValue(50);
+    varsModLayout->addWidget(new QLabel("kA:", this), 2, 0, Qt::AlignLeft);
+    auto kALabel = new QLabel(QString::number(static_cast<double>(modKa->value())/100),this);
+    varsModLayout->addWidget(kALabel, 2, 2, Qt::AlignLeft);
+    QObject::connect(modKa, &QSlider::sliderMoved, kALabel,
+                     [=](int pos){kALabel->setText(QString::number(static_cast<double>(pos)/100));});
+    varsModLayout->addWidget(modKa, 2, 1, Qt::AlignLeft);
+
+    this->modKp = new QSlider(this);
+    this->modKp->setOrientation(Qt::Horizontal);
+    this->modKp->setMinimumWidth(105);
+    this->modKp->setTickInterval(1);
+    this->modKp->setMaximum(5000);
+    this->modKp->setMinimum(0);
+    this->modKp->setValue(100);
+    varsModLayout->addWidget(new QLabel("kP:", this), 3, 0, Qt::AlignLeft);
+    auto kPLabel = new QLabel(QString::number(static_cast<double>(modKp->value())/100),this);
+    varsModLayout->addWidget(kPLabel, 3, 2, Qt::AlignLeft);
+    QObject::connect(modKp, &QSlider::sliderMoved, kPLabel,
+                     [=](int pos){kPLabel->setText(QString::number(static_cast<double>(pos)/100));});
+    varsModLayout->addWidget(modKp, 3, 1, Qt::AlignLeft);
 
     leftBarLayout->addWidget(varsMod, 4, 0 , 1, 4, Qt::AlignHCenter);
 
@@ -170,42 +198,332 @@ Lab4::Lab4(QWidget *parent) : QWidget(parent)
     this->spectrum = new QCheckBox("Enable DFT", this);
     this->reverse = new QCheckBox("Reverse DFT", this);
     reverse->setDisabled(true);
-    this->logYScale = new QCheckBox("Decibal Scale", this);
+    this->logYScale = new QCheckBox("Log YAxis", this);
     logYScale->setDisabled(true);
+    this->dbScale = new QCheckBox("Db Scale", this);
+    dbScale->setDisabled(true);
     this->shift = new QCheckBox("Shift", this);
     shift->setDisabled(true);
     this->normalize = new QCheckBox("Normalize", this);
     normalize->setDisabled(true);
 
+    this->bandwidthFreq = new QSlider(this);
+    this->bandwidthFreq->setOrientation(Qt::Horizontal);
+    this->bandwidthFreq->setMinimumWidth(105);
+    this->bandwidthFreq->setTickInterval(1);
+    this->bandwidthFreq->setMaximum(0);
+    this->bandwidthFreq->setMinimum(-5000);
+    this->bandwidthFreq->setValue(-300);
+    ssLayout->addWidget(new QLabel("Bandwidth Freq:", this), 3, 0,1,2, Qt::AlignLeft);
+    auto bFreqLabel = new QLabel(QString::number(static_cast<double>(bandwidthFreq->value())/100),this);
+    ssLayout->addWidget(bFreqLabel, 4, 1, 1, 2, Qt::AlignRight);
+    QObject::connect(bandwidthFreq, &QSlider::sliderMoved, bFreqLabel,
+                     [=](int pos){bFreqLabel->setText(QString::number(static_cast<double>(pos)/100));});
+    ssLayout->addWidget(bandwidthFreq, 4, 0, 1, 2, Qt::AlignLeft);
+
     ssLayout->addWidget(spectrum,0,0,Qt::AlignLeft);
     ssLayout->addWidget(reverse,0,1,Qt::AlignLeft);
     ssLayout->addWidget(shift,1,0,Qt::AlignLeft);
     ssLayout->addWidget(logYScale,1,1,Qt::AlignLeft);
+    ssLayout->addWidget(dbScale,2,1,Qt::AlignLeft);
     ssLayout->addWidget(normalize,2,0,Qt::AlignLeft);
     leftBarLayout->addWidget(spectrumSettings, 6, 0, 1, 4, Qt::AlignHCenter);
+
+    QObject::connect(funcSelection, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int v){selectedSeries(v);});
+    QObject::connect(rangeFrom, &QDoubleSpinBox::editingFinished, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(rangeTo, &QDoubleSpinBox::editingFinished, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(steps, &QDoubleSpinBox::editingFinished, this, [=]{selectedSeries(funcSelection->currentIndex());});
+
+    QObject::connect(amplitude, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(frequency, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+
+    QObject::connect(modAmplitude, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(modFrequency, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(modKa, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(modKp, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+
+    QObject::connect(modAmpl, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(modAmpl, &QCheckBox::stateChanged, this, [=](int state)
+                     {
+                         if(state==2)
+                         {
+                             modPhase->setDisabled(true);
+                         }
+                         else
+                         {
+                             modPhase->setDisabled(false);
+                         }
+                     });
+    QObject::connect(modPhase, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(modPhase, &QCheckBox::stateChanged, this, [=](int state)
+                     {
+                         if(state==2)
+                         {
+                             modAmpl->setDisabled(true);
+                         }
+                         else
+                         {
+                             modAmpl->setDisabled(false);
+                         }
+                     });
+
+    QObject::connect(spectrum, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(spectrum, &QCheckBox::stateChanged, this, [=](int state)
+                     {
+                         if(state==2)
+                         {
+                             if(reverse->checkState()==2)
+                                 reverse->setDisabled(false);
+                             else
+                             {
+                                 logYScale->setDisabled(false);
+                                 dbScale->setDisabled(false);
+                                 shift->setDisabled(false);
+                                 normalize->setDisabled(false);
+                                 reverse->setDisabled(false);
+                             }
+                         }
+                         else
+                         {
+                             logYScale->setDisabled(true);
+                             dbScale->setDisabled(true);
+                             shift->setDisabled(true);
+                             normalize->setDisabled(true);
+                             reverse->setDisabled(true);
+                         }
+                     });
+    QObject::connect(reverse, &QCheckBox::stateChanged, this, [=](int state)
+                     {
+                         if(state==2)
+                         {
+                             logYScale->setDisabled(true);
+                             dbScale->setDisabled(true);
+                             shift->setDisabled(true);
+                             normalize->setDisabled(true);
+                         }
+                         else
+                         {
+                             logYScale->setDisabled(false);
+                             dbScale->setDisabled(false);
+                             shift->setDisabled(false);
+                             normalize->setDisabled(false);
+                         }
+                     });
+    QObject::connect(logYScale, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(logYScale, &QCheckBox::stateChanged, this, [=](int state)
+                     {
+                         if(state==2)
+                         {
+                             dbScale->setDisabled(true);
+                         }
+                         else
+                         {
+                             dbScale->setDisabled(false);
+                         }
+                     });
+    QObject::connect(dbScale, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(dbScale, &QCheckBox::stateChanged, this, [=](int state)
+                     {
+                         if(state==2)
+                         {
+                             logYScale->setDisabled(true);
+                         }
+                         else
+                         {
+                             logYScale->setDisabled(false);
+                         }
+                     });
+    QObject::connect(shift, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(normalize, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(reverse, &QCheckBox::stateChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+    QObject::connect(bandwidthFreq, &QSlider::valueChanged, this, [=]{selectedSeries(funcSelection->currentIndex());});
+
+    selectedSeries(0);
 }
 
-QVector<double> Lab4::modulateAmplitude(QVector<double> x, double modFreq, double modAmp)
+double Lab4::modulateAmplitude(std::function<double(double)> foo, double x, double modFreq, double kA)
 {
-    return QVector<double>{};
+    return (1+kA*foo(x))*cos(2*M_PI*modFreq*x);
 }
 
-QVector<double> Lab4::modulatePhase(QVector<double> x, double modFreq, double modAmp)
+double Lab4::modulatePhase(std::function<double(double)> foo, double x, double modFreq, double kP)
 {
-    return QVector<double>{};
+    return cos(2*M_PI*modFreq*x+kP*foo(x));
 }
 
 void Lab4::selectedSeries(int selection)
 {
-
+    switch(selection)
+    {
+    case 0:
+        calculateSeries([this](double v)->double{return this->sFunction(v);});
+        break;
+    case 1:
+        calculateSeries([](double v)->double{return Lab3::xFunction(v);});
+        break;
+    case 2:
+        calculateSeries([](double v)->double{return Lab3::yFunction(v);});
+        break;
+    case 3:
+        calculateSeries([](double v)->double{return Lab3::zFunction(v);});
+        break;
+    case 4:
+        calculateSeries([](double v)->double{return Lab3::uFunction(v);});
+        break;
+    case 5:
+        calculateSeries([](double v)->double{return Lab3::vFunction(v);});
+        break;
+    case 6:
+        calculateSeries([](double v)->double{return Lab3::p1Function(v);});
+        break;
+    case 7:
+        calculateSeries([](double v)->double{return Lab3::p2Function(v);});
+        break;
+    case 8:
+        calculateSeries([](double v)->double{return Lab3::p3Function(v);});
+        break;
+    default:
+        return;
+    }
 }
 
 void Lab4::calculateSeries(std::function<double (double)> foo)
 {
+    double rangeF = rangeFrom->value();
+    double rangeT = rangeTo->value();
+    int stepsVal = steps->value();
+    double step = (rangeT-rangeF)/stepsVal; // deltaT
+    double fs = 1/step;
 
+    if(rangeF>=rangeT || step<=0)
+        return;
+    if(chartView->chart()->series().contains(series))
+        chartView->chart()->removeSeries(series);
+    if(series->name()!=funcSelection->currentText())
+    {
+        series->setName(funcSelection->currentText());
+        series->setColor(QColor::fromRgb(QRandomGenerator::global()->generate()));
+    }
+    series->clear();
+
+    QVector<double> xVec;
+    QVector<double> yVec;
+    for(double x = rangeF, ns = 0; x<=rangeT && ns<stepsVal; x+=step, ns++)
+    {
+        if(modAmpl->checkState()==2)
+        {
+            yVec.append(modulateAmplitude(foo, x,
+                                          static_cast<double>(modFrequency->value())/100,
+                                          static_cast<double>(modKa->value())/100));
+        }
+        else if(modPhase->checkState()==2)
+        {
+            yVec.append(modulatePhase(foo, x,
+                                      static_cast<double>(modFrequency->value())/100,
+                                      static_cast<double>(modKp->value())/100));
+        }
+        else
+        {
+            yVec.append(foo(x));
+        }
+        xVec.append(x);
+    }
+    if(spectrum->checkState()==2)
+    {
+        QVector<std::complex<double>> results = Lab3::calculateDFT(yVec);
+        if(shift->checkState()==2)
+            for(int i=0;i<=results.length()/2;i++)
+            {
+                auto temp = results.front();
+                results.pop_front();
+                results.append(temp);
+            }
+
+        if(reverse->checkState()==2)
+        {
+            yVec = Lab3::reverseDFT(results);
+        }
+        else
+        {
+            yVec.clear();
+            xVec.clear();
+            for(int k = 0; k<results.length(); k++)
+            {
+                double y = abs(results.at(k));
+                double x = (k*(fs/stepsVal));
+
+                if(normalize->checkState()==2)
+                    y = y/(stepsVal/2);
+                if(shift->checkState()==2)
+                    x-=fs/2;
+
+                yVec.append(y);
+                xVec.append(x);
+            }
+        }
+    }
+    for(int i=0; i<xVec.length() && i<yVec.length(); i++)
+    {
+        if(dbScale->checkState()==2)
+        {
+            yVec[i] = 10*log10(yVec.at(i));
+            series->append(xVec.at(i), yVec.at(i));
+        }
+        else
+            series->append(xVec.at(i), yVec.at(i));
+    }
+    chartView->chart()->addSeries(series);
+    chartView->chart()->createDefaultAxes();
+
+    if(logYScale->checkState()==2)
+    {
+        QLogValueAxis* axis = new QLogValueAxis(this);
+        axis->setBase(10);
+        auto temp = chartView->chart()->axes(Qt::Vertical);
+        for(auto a : temp)
+        {
+            chartView->chart()->removeAxis(a);
+            a->deleteLater();
+        }
+        chartView->chart()->addAxis(axis, Qt::AlignLeft);
+        series->attachAxis(axis);
+    }
+    if(dbScale->checkState()==2)
+    {
+        QPair<double,double> minMax = calculateBandwidth(yVec, xVec, static_cast<double>(bandwidthFreq->value())/100);
+        qDebug()<<minMax;
+        QCategoryAxis* axis = new QCategoryAxis(this);
+        axis->setMin(xVec.first());
+        axis->setMax(xVec.last());
+        axis->setStartValue(minMax.first);
+        axis->append(QString::number(minMax.second-minMax.first,'f',2), minMax.second);
+        chartView->chart()->addAxis(axis, Qt::AlignBottom);
+    }
+}
+QPair<double, double> Lab4::calculateBandwidth(QVector<double> yVal, QVector<double>xVal, double dec)
+{
+    double min = 0;
+    double max = 0;
+    bool gotMin = false;
+    for(int i=0; i<xVal.length()/2; i++)
+    {
+        if(yVal.at(i)>dec)
+        {
+            if(gotMin)
+                max = xVal.at(i);
+            else
+            {
+                min = xVal.at(i);
+                gotMin = true;
+            }
+        }
+    }
+    return QPair<double, double>(min, max);
 }
 
 double Lab4::sFunction(double x)
 {
-    return 0;
+    double amp = static_cast<double>(amplitude->value())/100;
+    double freq = static_cast<double>(frequency->value())/100;
+    return amp*sin(2*M_PI*freq*x);
 }
