@@ -1,4 +1,4 @@
-#include "lab5.h"
+﻿#include "lab5.h"
 
 Lab5::Lab5(QWidget *parent) : QWidget(parent)
 {
@@ -44,7 +44,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->psk = new QCheckBox("PSK");
     msLayout->addWidget(psk, 1, 2, Qt::AlignLeft);
 
-    this->input = new QLineEdit("please end me",this);
+    this->input = new QLineEdit("Lewicki Maciej",this);
     msLayout->addWidget(new QLabel("Input:", this), 2, 0, Qt::AlignLeft);
     msLayout->addWidget(input, 2, 1, 1, 5, Qt::AlignHCenter);
 
@@ -115,7 +115,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->askTargetFreq->setTickInterval(1);
     this->askTargetFreq->setMaximum(1000);
     this->askTargetFreq->setMinimum(0);
-    this->askTargetFreq->setValue(200);
+    this->askTargetFreq->setValue(189);
     askBoxLayout->addWidget(new QLabel("Tf:", this), 2, 0, Qt::AlignLeft);
     auto askTargetFreqLabel = new QLabel(QString::number(static_cast<double>(askTargetFreq->value())/100),this);
     askBoxLayout->addWidget(askTargetFreqLabel, 2, 2, Qt::AlignLeft);
@@ -180,7 +180,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->fskTargetFreq2->setTickInterval(1);
     this->fskTargetFreq2->setMaximum(1000);
     this->fskTargetFreq2->setMinimum(0);
-    this->fskTargetFreq2->setValue(200);
+    this->fskTargetFreq2->setValue(189);
     fskBoxLayout->addWidget(new QLabel("Tf2:", this), 2, 0, Qt::AlignLeft);
     auto fskTargetFreq2Label = new QLabel(QString::number(static_cast<double>(fskTargetFreq2->value())/100),this);
     fskBoxLayout->addWidget(fskTargetFreq2Label, 2, 2, Qt::AlignLeft);
@@ -231,7 +231,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->pskTargetFreq->setTickInterval(1);
     this->pskTargetFreq->setMaximum(1000);
     this->pskTargetFreq->setMinimum(0);
-    this->pskTargetFreq->setValue(100);
+    this->pskTargetFreq->setValue(189);
     pskBoxLayout->addWidget(new QLabel("Tf:", this), 1, 0, Qt::AlignLeft);
     auto pskTargetFreqLabel = new QLabel(QString::number(static_cast<double>(pskTargetFreq->value())/100),this);
     pskBoxLayout->addWidget(pskTargetFreqLabel, 1, 2, Qt::AlignLeft);
@@ -411,9 +411,12 @@ void Lab5::calculateSeries()
     QBitArray bits = bitsFromString(input->text());
     double bitLim = (bitLimit->value()>bits.count()) ? bits.count() : bitLimit->value();
     double range = deltaT->value() * bitLim;
-    double step = range/steps->value();
+    int stepsVal = steps->value();
+    double step = range/stepsVal;
+    double fs = 1/step;
 
-    for(int i=0; i<steps->value(); i++)
+
+    for(int i=0; i<stepsVal; i++)
     {
         vecX.append(i*step);
         int bitNr = static_cast<int>(step*i/deltaT->value());
@@ -425,7 +428,7 @@ void Lab5::calculateSeries()
     if(inputSeries->checkState()==2)
     {
         QLineSeries* series = new QLineSeries(this);
-        for(int i=0; i<steps->value(); i++)
+        for(int i=0; i<stepsVal; i++)
         {
             series->append(vecX.at(i), vecY.at(i));
         }
@@ -435,7 +438,7 @@ void Lab5::calculateSeries()
     {
         double y;
         QLineSeries* series = new QLineSeries(this);
-        for(int i=0; i<steps->value(); i++)
+        for(int i=0; i<stepsVal; i++)
         {
             if(vecY.at(i))
                 y = (askAmp1_l)*(sin(2*M_PI*askTargetFreq_l*vecX.at(i)+askShift_l));
@@ -449,7 +452,7 @@ void Lab5::calculateSeries()
     {
         double y;
         QLineSeries* series = new QLineSeries(this);
-        for(int i=0; i<steps->value(); i++)
+        for(int i=0; i<stepsVal; i++)
         {
             if(vecY.at(i))
                 y = (fskAmp_l)*(sin(2*M_PI*fskTargetFreq1_l*vecX.at(i)+fskShift_l));
@@ -463,7 +466,7 @@ void Lab5::calculateSeries()
     {
         double y;
         QLineSeries* series = new QLineSeries(this);
-        for(int i=0; i<steps->value(); i++)
+        for(int i=0; i<stepsVal; i++)
         {
             if(vecY.at(i))
                 y = (pskAmp_l)*(sin(2*M_PI*pskTargetFreq_l*vecX.at(i)+pskShift1_l));
@@ -473,6 +476,46 @@ void Lab5::calculateSeries()
         }
         chartView->chart()->addSeries(series);
     }
+    if(spectrum->checkState()==2)
+    {
+        auto series = chartView->chart()->series();
+        for(QAbstractSeries* s : series)
+        {
+            QLineSeries* s1 = (QLineSeries*) s;
+            QVector<QPointF> tempPoints;
+            double max = -INFINITY;
+            QVector<std::complex<double>> results = Lab3::calculateDFT(s1->points());
+            if(shift->checkState()==2)
+                for(int i=0;i<=results.length()/2;i++)
+                {
+                    auto temp = results.front();
+                    results.pop_front();
+                    results.append(temp);
+                }
+            for(int k = 0; k<results.length(); k++)
+            {
+                double y = abs(results.at(k));
+                double x = (k*(fs/stepsVal));
+
+                if(normalize->checkState()==2)
+                    y = y/(stepsVal/2);
+                if(shift->checkState()==2)
+                    x-=fs/2;
+                if(dbScale->checkState()==2)
+                    y = 10*log10(y);
+                tempPoints.append(QPointF(x,y));
+                if(y>max)
+                    max=y;
+            }
+            if(zeroHighestVal->checkState()==2)
+                for(int i=0; i<tempPoints.length();i++)
+                    tempPoints.replace(i,QPointF(tempPoints.at(i).x(),tempPoints.at(i).y()-max));
+            s1->replace(tempPoints);
+            chartView->chart()->removeSeries(s);
+            chartView->chart()->addSeries(s1);
+        }
+    }
+
     chartView->chart()->createDefaultAxes();
     if(chartView->chart()->axes(Qt::Vertical).length()>0)
     {
@@ -480,6 +523,30 @@ void Lab5::calculateSeries()
         double addRange = (axisY->max() - axisY->min())*0.10;
         axisY->setMax(axisY->max()+addRange);
         axisY->setMin(axisY->min()-addRange);
+    }
+    if(dbScale->checkState()==2)
+    {
+        auto series = chartView->chart()->series();
+        for(QAbstractSeries* s : series)
+        {
+            QLineSeries* s1 = (QLineSeries*) s;
+            QPair<double,double> minMax = Lab4::calculateBandwidth(s1->pointsVector(), static_cast<double>(bandwidthFreq->value())/100);
+            QCategoryAxis* axis = new QCategoryAxis(this);
+            axis->setMin(s1->pointsVector().first().x());
+            axis->setMax(s1->pointsVector().last().x());
+            axis->setStartValue(minMax.first);
+            QPen pen;
+            pen.setColor("indianred");
+            pen.setWidth(2);
+            axis->setGridLinePen(pen);
+            axis->append("Bandwidth: "+QString::number(minMax.second-minMax.first,'f',2), minMax.second);
+            chartView->chart()->addAxis(axis, Qt::AlignBottom);
+        }
+        auto temp = (QValueAxis*)chartView->chart()->axes(Qt::Vertical).at(0);
+        QValueAxis* help = new QValueAxis(this);
+        help->setRange(temp->min(), temp->max());
+        help->setLabelFormat(" ");
+        chartView->chart()->addAxis(help, Qt::AlignRight);
     }
 }
 

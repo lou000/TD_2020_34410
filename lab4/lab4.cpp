@@ -504,7 +504,6 @@ void Lab4::calculateSeries(std::function<double (double)> foo)
     if(dbScale->checkState()==2)
     {
         QPair<double,double> minMax = calculateBandwidth(yVec, xVec, static_cast<double>(bandwidthFreq->value())/100);
-        qDebug()<<minMax;
         QCategoryAxis* axis = new QCategoryAxis(this);
         axis->setMin(xVec.first());
         axis->setMax(xVec.last());
@@ -536,6 +535,31 @@ QPair<double, double> Lab4::calculateBandwidth(QVector<double> yVal, QVector<dou
             else
             {
                 min = xVal.at(i);
+                gotMin = true;
+            }
+        }
+    }
+    if(min==0)
+        max=0;
+    if(max==0)
+        min=0;
+    return QPair<double, double>(min, max);
+}
+
+QPair<double, double> Lab4::calculateBandwidth(QVector<QPointF> vec, double dec)
+{
+    double min = 0;
+    double max = 0;
+    bool gotMin = false;
+    for(int i=0; i<vec.length()/2; i++)
+    {
+        if(vec.at(i).y()>dec)
+        {
+            if(gotMin)
+                max = vec.at(i).x();
+            else
+            {
+                min = vec.at(i).x();
                 gotMin = true;
             }
         }

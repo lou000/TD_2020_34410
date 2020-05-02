@@ -31,6 +31,7 @@ public:
     static double modulateAmplitude(std::function<double(double)> foo, double x, double modFreq, double kA);
     static double modulatePhase(std::function<double(double)> foo, double x, double modFreq, double kP);
     static QPair<double, double> calculateBandwidth(QVector<double> yVal, QVector<double>xVal, double dec);
+    static QPair<double, double> calculateBandwidth(QVector<QPointF> vec, double dec);
 
     void selectedSeries(int selection);
     void calculateSeries(std::function<double(double)> foo);

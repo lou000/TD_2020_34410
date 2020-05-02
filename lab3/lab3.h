@@ -28,6 +28,7 @@ class Lab3 : public QWidget
 public:
     explicit Lab3(QWidget *parent = nullptr);
     static QVector<std::complex<double>> calculateDFT(QVector<double> x);
+    static QVector<std::complex<double>> calculateDFT(QList<QPointF> point);
     static QVector<double> reverseDFT(QVector<std::complex<double>> dft);
     static double xFunction(double x);
     static double yFunction(double x);
