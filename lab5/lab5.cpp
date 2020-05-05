@@ -67,8 +67,8 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     msLayout->addWidget(bitLimit, 4, 1, 1, 5, Qt::AlignHCenter);
 
     this->endian = new QComboBox(this);
-    this->endian->addItem("Little Endian");
     this->endian->addItem("Big Endian");
+    this->endian->addItem("Little Endian");
     msLayout->addWidget(new QLabel("Endian:", this), 5, 0, Qt::AlignLeft);
     msLayout->addWidget(endian, 5, 1, 1, 5, Qt::AlignHCenter);
 
@@ -408,7 +408,8 @@ void Lab5::calculateSeries()
     double pskShift1_l = static_cast<double>(pskShift1->value())/100;
     double pskShift2_l = static_cast<double>(pskShift2->value())/100;
 
-    QBitArray bits = bitsFromString(input->text());
+    Endian end = (endian->currentIndex()>0) ? LittleEndian : BigEndian;
+    QBitArray bits = bitsFromString(input->text(), end);
     double bitLim = (bitLimit->value()>bits.count()) ? bits.count() : bitLimit->value();
     double range = deltaT->value() * bitLim;
     int stepsVal = steps->value();
@@ -550,10 +551,22 @@ void Lab5::calculateSeries()
     }
 }
 
-QBitArray Lab5::bitsFromString(QString s)
+QBitArray Lab5::bitsFromString(QString s, Endian e)
 {
     QByteArray ba = s.toLocal8Bit();
     const char* c = ba.data();
-    return QBitArray::fromBits(c,ba.size()*8);
+    QBitArray bitArr = QBitArray::fromBits(c,ba.size()*8);
+    if(e == LittleEndian)
+        reverseBitArray(bitArr);
+    return bitArr;
+}
+void Lab5::reverseBitArray(QBitArray &arr)
+{
+    for(int i=0; i<arr.count()/2;i++)
+    {
+        bool bit = arr.at(i);
+        arr.setBit(i,arr.at(arr.count()-1-i));
+        arr.setBit(arr.count()-1-i, bit);
+    }
 }
 

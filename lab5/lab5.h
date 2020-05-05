@@ -26,6 +26,11 @@
 #include "lab3/lab3.h"
 #include "lab4/lab4.h"
 
+enum Endian
+{
+    BigEndian,
+    LittleEndian
+};
 
 class Lab5 : public QWidget
 {
@@ -33,7 +38,8 @@ class Lab5 : public QWidget
 public:
     explicit Lab5(QWidget *parent = nullptr);
     void calculateSeries();
-    QBitArray bitsFromString(QString s);
+    QBitArray bitsFromString(QString s, Endian e);
+    void reverseBitArray(QBitArray &arr);
 
     QChartViewWithZoomAndDrag* chartView;
 
