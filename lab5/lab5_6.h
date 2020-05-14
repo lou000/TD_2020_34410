@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QObject>
 #include <QWidget>
@@ -49,6 +49,11 @@ public:
     QCheckBox* fsk;
     QCheckBox* psk;
 
+    QCheckBox* dX;
+    QCheckBox* dP;
+    QCheckBox* dM;
+    QDoubleSpinBox* dh;
+
     QLineEdit* input;
     QSpinBox* steps;
     QSpinBox* bitLimit;
@@ -57,14 +62,11 @@ public:
     QSlider* askAmp1;
     QSlider* askAmp2;
     QSlider* askTargetFreq;
-    QSlider* askShift;
 
-    QSlider* fskAmp;
     QSlider* fskTargetFreq1;
     QSlider* fskTargetFreq2;
     QSlider* fskShift;
 
-    QSlider* pskAmp;
     QSlider* pskTargetFreq;
     QSlider* pskShift1;
     QSlider* pskShift2;

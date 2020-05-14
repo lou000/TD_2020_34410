@@ -3,7 +3,7 @@
 #include "lab2/lab2.h"
 #include "lab3/lab3.h"
 #include "lab4/lab4.h"
-#include "lab5/lab5.h"
+#include "lab5/lab5_6.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     centralWidget->insertTab(1, new Lab2(centralWidget), "Lab2");
     centralWidget->insertTab(2, new Lab3(centralWidget), "Lab3");
     centralWidget->insertTab(3, new Lab4(centralWidget), "Lab4");
-    centralWidget->insertTab(4, new Lab5(centralWidget), "Lab5");
+    centralWidget->insertTab(4, new Lab5(centralWidget), "Lab5/6");
     centralWidget->setCurrentIndex(centralWidget->count()-1);
     this->setCentralWidget(centralWidget);
 }

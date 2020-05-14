@@ -1,4 +1,4 @@
-﻿#include "lab5.h"
+﻿#include "lab5_6.h"
 
 Lab5::Lab5(QWidget *parent) : QWidget(parent)
 {
@@ -26,7 +26,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     auto msLayout = new QGridLayout();
     modSelection->setLayout(msLayout);
     modSelection->setMinimumWidth(200);
-    modSelection->setMinimumHeight(175);
+    modSelection->setMinimumHeight(250);
     this->inputSeries = new QCheckBox("INPUT");
     msLayout->addWidget(inputSeries, 0, 0, Qt::AlignLeft);
     this->deltaT = new QDoubleSpinBox(this);
@@ -34,7 +34,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->deltaT->setMaximumWidth(80);
     this->deltaT->setMaximum(2);
     this->deltaT->setMinimum(0);
-    this->deltaT->setValue(0.5);
+    this->deltaT->setValue(0.1);
     msLayout->addWidget(new QLabel(" dT:", this), 0, 1, Qt::AlignRight);
     msLayout->addWidget(deltaT, 0, 2, Qt::AlignHCenter);
     this->ask = new QCheckBox("ASK");
@@ -62,7 +62,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->bitLimit->setMaximumWidth(80);
     this->bitLimit->setMaximum(999999);
     this->bitLimit->setMinimum(1);
-    this->bitLimit->setValue(100);
+    this->bitLimit->setValue(10);
     msLayout->addWidget(new QLabel("Bit Limit:", this), 4, 0, Qt::AlignLeft);
     msLayout->addWidget(bitLimit, 4, 1, 1, 5, Qt::AlignHCenter);
 
@@ -71,6 +71,23 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->endian->addItem("Little Endian");
     msLayout->addWidget(new QLabel("Endian:", this), 5, 0, Qt::AlignLeft);
     msLayout->addWidget(endian, 5, 1, 1, 5, Qt::AlignHCenter);
+
+    msLayout->addWidget(new QLabel("Demodulate:", this), 6, 0, 1, 2, Qt::AlignLeft);
+    this->dX = new QCheckBox("x(t)");
+    msLayout->addWidget(dX, 7, 0, Qt::AlignLeft);
+    this->dP = new QCheckBox("p(t)");
+    msLayout->addWidget(dP, 7, 1, Qt::AlignLeft);
+    this->dM = new QCheckBox("m(t)");
+    msLayout->addWidget(dM, 7, 2, Qt::AlignLeft);
+
+    this->dh = new QDoubleSpinBox(this);
+    this->dh->setAlignment(Qt::AlignRight);
+    this->dh->setMaximumWidth(80);
+    this->dh->setMaximum(10);
+    this->dh->setMinimum(-10);
+    this->dh->setValue(0.8);
+    msLayout->addWidget(new QLabel(" h:", this), 8, 0, Qt::AlignLeft);
+    msLayout->addWidget(dh, 8, 1, 1, 5, Qt::AlignHCenter);
 
     leftBarLayout->addWidget(modSelection, 0, 0 , 1, 4, Qt::AlignHCenter);
 
@@ -87,7 +104,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->askAmp1->setTickInterval(1);
     this->askAmp1->setMaximum(200);
     this->askAmp1->setMinimum(0);
-    this->askAmp1->setValue(50);
+    this->askAmp1->setValue(100);
     askBoxLayout->addWidget(new QLabel("A1:", this), 0, 0, Qt::AlignLeft);
     auto askAmp1Label = new QLabel(QString::number(static_cast<double>(askAmp1->value())/100),this);
     askBoxLayout->addWidget(askAmp1Label, 0, 2, Qt::AlignLeft);
@@ -101,7 +118,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->askAmp2->setTickInterval(1);
     this->askAmp2->setMaximum(200);
     this->askAmp2->setMinimum(0);
-    this->askAmp2->setValue(100);
+    this->askAmp2->setValue(0);
     askBoxLayout->addWidget(new QLabel("A2:", this), 1, 0, Qt::AlignLeft);
     auto askAmp2Label = new QLabel(QString::number(static_cast<double>(askAmp2->value())/100),this);
     askBoxLayout->addWidget(askAmp2Label, 1, 2, Qt::AlignLeft);
@@ -113,29 +130,15 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->askTargetFreq->setOrientation(Qt::Horizontal);
     this->askTargetFreq->setMinimumWidth(105);
     this->askTargetFreq->setTickInterval(1);
-    this->askTargetFreq->setMaximum(1000);
+    this->askTargetFreq->setMaximum(3000);
     this->askTargetFreq->setMinimum(0);
-    this->askTargetFreq->setValue(189);
+    this->askTargetFreq->setValue(2000);
     askBoxLayout->addWidget(new QLabel("Tf:", this), 2, 0, Qt::AlignLeft);
     auto askTargetFreqLabel = new QLabel(QString::number(static_cast<double>(askTargetFreq->value())/100),this);
     askBoxLayout->addWidget(askTargetFreqLabel, 2, 2, Qt::AlignLeft);
     QObject::connect(askTargetFreq, &QSlider::sliderMoved, askTargetFreqLabel,
                      [=](int pos){askTargetFreqLabel->setText(QString::number(static_cast<double>(pos)/100));});
     askBoxLayout->addWidget(askTargetFreq, 2, 1, Qt::AlignHCenter);
-
-    this->askShift = new QSlider(this);
-    this->askShift->setOrientation(Qt::Horizontal);
-    this->askShift->setMinimumWidth(105);
-    this->askShift->setTickInterval(1);
-    this->askShift->setMaximum(1000);
-    this->askShift->setMinimum(0);
-    this->askShift->setValue(0);
-    askBoxLayout->addWidget(new QLabel("Shift:", this), 3, 0, Qt::AlignLeft);
-    auto askShiftLabel = new QLabel(QString::number(static_cast<double>(askShift->value())/100),this);
-    askBoxLayout->addWidget(askShiftLabel, 3, 2, Qt::AlignLeft);
-    QObject::connect(askShift, &QSlider::sliderMoved, askShiftLabel,
-                     [=](int pos){askShiftLabel->setText(QString::number(static_cast<double>(pos)/100));});
-    askBoxLayout->addWidget(askShift, 3, 1, Qt::AlignHCenter);
 
     leftBarLayout->addWidget(askBox, 3, 0 , 1, 4, Qt::AlignHCenter);
 
@@ -146,27 +149,13 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     fskBox->setMinimumWidth(200);
     fskBox->setMaximumHeight(150);
 
-    this->fskAmp = new QSlider(this);
-    this->fskAmp->setOrientation(Qt::Horizontal);
-    this->fskAmp->setMinimumWidth(105);
-    this->fskAmp->setTickInterval(1);
-    this->fskAmp->setMaximum(200);
-    this->fskAmp->setMinimum(0);
-    this->fskAmp->setValue(50);
-    fskBoxLayout->addWidget(new QLabel("A:", this), 0, 0, Qt::AlignLeft);
-    auto fskAmpLabel = new QLabel(QString::number(static_cast<double>(fskAmp->value())/100),this);
-    fskBoxLayout->addWidget(fskAmpLabel, 0, 2, Qt::AlignLeft);
-    QObject::connect(fskAmp, &QSlider::sliderMoved, fskAmpLabel,
-                     [=](int pos){fskAmpLabel->setText(QString::number(static_cast<double>(pos)/100));});
-    fskBoxLayout->addWidget(fskAmp, 0, 1, Qt::AlignHCenter);
-
     this->fskTargetFreq1 = new QSlider(this);
     this->fskTargetFreq1->setOrientation(Qt::Horizontal);
     this->fskTargetFreq1->setMinimumWidth(105);
     this->fskTargetFreq1->setTickInterval(1);
-    this->fskTargetFreq1->setMaximum(1000);
+    this->fskTargetFreq1->setMaximum(3000);
     this->fskTargetFreq1->setMinimum(0);
-    this->fskTargetFreq1->setValue(100);
+    this->fskTargetFreq1->setValue(2000);
     fskBoxLayout->addWidget(new QLabel("Tf1:", this), 1, 0, Qt::AlignLeft);
     auto fskTargetFreq1Label = new QLabel(QString::number(static_cast<double>(fskTargetFreq1->value())/100),this);
     fskBoxLayout->addWidget(fskTargetFreq1Label, 1, 2, Qt::AlignLeft);
@@ -178,9 +167,9 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->fskTargetFreq2->setOrientation(Qt::Horizontal);
     this->fskTargetFreq2->setMinimumWidth(105);
     this->fskTargetFreq2->setTickInterval(1);
-    this->fskTargetFreq2->setMaximum(1000);
+    this->fskTargetFreq2->setMaximum(3000);
     this->fskTargetFreq2->setMinimum(0);
-    this->fskTargetFreq2->setValue(189);
+    this->fskTargetFreq2->setValue(3000);
     fskBoxLayout->addWidget(new QLabel("Tf2:", this), 2, 0, Qt::AlignLeft);
     auto fskTargetFreq2Label = new QLabel(QString::number(static_cast<double>(fskTargetFreq2->value())/100),this);
     fskBoxLayout->addWidget(fskTargetFreq2Label, 2, 2, Qt::AlignLeft);
@@ -211,27 +200,13 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     pskBox->setMinimumWidth(200);
     pskBox->setMaximumHeight(150);
 
-    this->pskAmp = new QSlider(this);
-    this->pskAmp->setOrientation(Qt::Horizontal);
-    this->pskAmp->setMinimumWidth(105);
-    this->pskAmp->setTickInterval(1);
-    this->pskAmp->setMaximum(200);
-    this->pskAmp->setMinimum(0);
-    this->pskAmp->setValue(50);
-    pskBoxLayout->addWidget(new QLabel("A:", this), 0, 0, Qt::AlignLeft);
-    auto pskAmpLabel = new QLabel(QString::number(static_cast<double>(pskAmp->value())/100),this);
-    pskBoxLayout->addWidget(pskAmpLabel, 0, 2, Qt::AlignLeft);
-    QObject::connect(pskAmp, &QSlider::sliderMoved, pskAmpLabel,
-                     [=](int pos){pskAmpLabel->setText(QString::number(static_cast<double>(pos)/100));});
-    pskBoxLayout->addWidget(pskAmp, 0, 1, Qt::AlignHCenter);
-
     this->pskTargetFreq = new QSlider(this);
     this->pskTargetFreq->setOrientation(Qt::Horizontal);
     this->pskTargetFreq->setMinimumWidth(105);
     this->pskTargetFreq->setTickInterval(1);
-    this->pskTargetFreq->setMaximum(1000);
+    this->pskTargetFreq->setMaximum(3000);
     this->pskTargetFreq->setMinimum(0);
-    this->pskTargetFreq->setValue(189);
+    this->pskTargetFreq->setValue(2000);
     pskBoxLayout->addWidget(new QLabel("Tf:", this), 1, 0, Qt::AlignLeft);
     auto pskTargetFreqLabel = new QLabel(QString::number(static_cast<double>(pskTargetFreq->value())/100),this);
     pskBoxLayout->addWidget(pskTargetFreqLabel, 1, 2, Qt::AlignLeft);
@@ -245,7 +220,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     this->pskShift1->setTickInterval(1);
     this->pskShift1->setMaximum(1000);
     this->pskShift1->setMinimum(0);
-    this->pskShift1->setValue(200);
+    this->pskShift1->setValue(314);
     pskBoxLayout->addWidget(new QLabel("Shift1:", this), 2, 0, Qt::AlignLeft);
     auto pskShift1Label = new QLabel(QString::number(static_cast<double>(pskShift1->value())/100),this);
     pskBoxLayout->addWidget(pskShift1Label, 2, 2, Qt::AlignLeft);
@@ -311,9 +286,54 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     leftBarLayout->addWidget(spectrumSettings, 6, 0, 1, 4, Qt::AlignHCenter);
 
     QObject::connect(inputSeries, &QCheckBox::stateChanged, this, [=]{calculateSeries();});
+    QObject::connect(deltaT, &QDoubleSpinBox::textChanged, this, [=]{calculateSeries();});
     QObject::connect(ask, &QCheckBox::stateChanged, this, [=]{calculateSeries();});
     QObject::connect(fsk, &QCheckBox::stateChanged, this, [=]{calculateSeries();});
     QObject::connect(psk, &QCheckBox::stateChanged, this, [=]{calculateSeries();});
+
+    QObject::connect(dX, &QCheckBox::stateChanged, this, [=](int state)
+    {
+        if(state==2)
+        {
+            dP->setDisabled(true);
+            dM->setDisabled(true);
+        }
+        else
+        {
+            dP->setDisabled(false);
+            dM->setDisabled(false);
+        }
+        calculateSeries();
+    });
+    QObject::connect(dP, &QCheckBox::stateChanged, this, [=](int state)
+    {
+        if(state==2)
+        {
+            dX->setDisabled(true);
+            dM->setDisabled(true);
+        }
+        else
+        {
+            dX->setDisabled(false);
+            dM->setDisabled(false);
+        }
+        calculateSeries();
+    });
+    QObject::connect(dM, &QCheckBox::stateChanged, this, [=](int state)
+    {
+        if(state==2)
+        {
+            dX->setDisabled(true);
+            dP->setDisabled(true);
+        }
+        else
+        {
+            dX->setDisabled(false);
+            dP->setDisabled(false);
+        }
+        calculateSeries();
+    });
+    QObject::connect(dh, &QDoubleSpinBox::textChanged, this, [=]{calculateSeries();});
 
     QObject::connect(input, &QLineEdit::textEdited, this, [=]{calculateSeries();});
     QObject::connect(steps, &QSpinBox::textChanged, this, [=]{calculateSeries();});
@@ -323,14 +343,11 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     QObject::connect(askAmp1, &QSlider::valueChanged, this, [=]{calculateSeries();});
     QObject::connect(askAmp2, &QSlider::valueChanged, this, [=]{calculateSeries();});
     QObject::connect(askTargetFreq, &QSlider::valueChanged, this, [=]{calculateSeries();});
-    QObject::connect(askShift, &QSlider::valueChanged, this, [=]{calculateSeries();});
 
-    QObject::connect(fskAmp, &QSlider::valueChanged, this, [=]{calculateSeries();});
     QObject::connect(fskTargetFreq1, &QSlider::valueChanged, this, [=]{calculateSeries();});
     QObject::connect(fskTargetFreq2, &QSlider::valueChanged, this, [=]{calculateSeries();});
     QObject::connect(fskShift, &QSlider::valueChanged, this, [=]{calculateSeries();});
 
-    QObject::connect(pskAmp, &QSlider::valueChanged, this, [=]{calculateSeries();});
     QObject::connect(pskTargetFreq, &QSlider::valueChanged, this, [=]{calculateSeries();});
     QObject::connect(pskShift1, &QSlider::valueChanged, this, [=]{calculateSeries();});
     QObject::connect(pskShift2, &QSlider::valueChanged, this, [=]{calculateSeries();});
@@ -396,14 +413,14 @@ void Lab5::calculateSeries()
     double askAmp1_l = static_cast<double>(askAmp1->value())/100;
     double askAmp2_l = static_cast<double>(askAmp2->value())/100;
     double askTargetFreq_l = static_cast<double>(askTargetFreq->value())/100;
-    double askShift_l = static_cast<double>(askShift->value())/100;
+    double askShift_l = 0;
 
-    double fskAmp_l = static_cast<double>(fskAmp->value())/100;
+    double fskAmp_l = 0.5;
     double fskTargetFreq1_l = static_cast<double>(fskTargetFreq1->value())/100;
     double fskTargetFreq2_l = static_cast<double>(fskTargetFreq2->value())/100;
     double fskShift_l = static_cast<double>(fskShift->value())/100;
 
-    double pskAmp_l = static_cast<double>(pskAmp->value())/100;
+    double pskAmp_l = 0.5;
     double pskTargetFreq_l = static_cast<double>(pskTargetFreq->value())/100;
     double pskShift1_l = static_cast<double>(pskShift1->value())/100;
     double pskShift2_l = static_cast<double>(pskShift2->value())/100;
@@ -437,44 +454,178 @@ void Lab5::calculateSeries()
     }
     if(ask->checkState()==2)
     {
-        double y;
+        //during demodulation increasing A2 requires also increasing h
+        QVector<double> tempY;
         QLineSeries* series = new QLineSeries(this);
         for(int i=0; i<stepsVal; i++)
         {
+            //modulating binary signal
             if(vecY.at(i))
-                y = (askAmp1_l)*(sin(2*M_PI*askTargetFreq_l*vecX.at(i)+askShift_l));
+                tempY.append((askAmp1_l)*(sin(2*M_PI*askTargetFreq_l*vecX.at(i)+askShift_l)));
             else
-                y = (askAmp2_l)*(sin(2*M_PI*askTargetFreq_l*vecX.at(i)+askShift_l));
-            series->append(vecX.at(i), y);
+                tempY.append((askAmp2_l)*(sin(2*M_PI*askTargetFreq_l*vecX.at(i)+askShift_l)));
         }
+        if(dX->checkState()==2 || dP->checkState()==2 || dM->checkState()==2)
+        {
+            //multiplication of modulated signal and carrier signal
+            for(int i=0; i<tempY.length(); i++)
+                tempY[i] *= (askAmp1_l)*(sin(2*M_PI*askTargetFreq_l*vecX.at(i)+askShift_l));
+        }
+        if(dP->checkState()==2 || dM->checkState()==2)
+        {
+            for(int b=0; b<bitLim; b++)
+            {
+                int bitLength = stepsVal/bitLim;
+                int bitStartStep = b*bitLength;
+                int bitEndStep = (b+1)*bitLength;
+                double integral = 0;
+
+                for(int i=bitStartStep; i<bitEndStep-1; i++)
+                {
+                    //trapezoid integral with step based on the same delta as series
+                    //               (a     +     b)       /2*           h
+                    integral += (tempY.at(i)+tempY.at(i+1))/2*(vecX.at(i+1)-vecX.at(i));
+
+
+                    //values included in example charts had this integral multiplied by 1000 so im doing the same
+                    //this was probably done in order to avoid setting h to tiny numbers eg. h = 0.000001
+                    tempY[i] = integral*1000;
+                }
+            }
+        }
+        if(dM->checkState()==2)
+        {
+            //setting demodulated signal values based on h threshold
+            for(int i=0; i<tempY.length(); i++)
+                if(tempY.at(i)>dh->value())
+                    tempY[i] = 1;
+                else
+                    tempY[i] = 0;
+        }
+        for(int i=0; i<vecX.length() && i<tempY.length(); i++)
+            series->append(vecX.at(i), tempY.at(i));
         chartView->chart()->addSeries(series);
     }
     if(fsk->checkState()==2)
     {
-        double y;
+        QVector<double> tempY;
+        QVector<double> tempY2;
+        QVector<double> tempY3;
         QLineSeries* series = new QLineSeries(this);
         for(int i=0; i<stepsVal; i++)
         {
             if(vecY.at(i))
-                y = (fskAmp_l)*(sin(2*M_PI*fskTargetFreq1_l*vecX.at(i)+fskShift_l));
+                tempY.append((fskAmp_l)*(sin(2*M_PI*fskTargetFreq1_l*vecX.at(i)+fskShift_l)));
             else
-                y = (fskAmp_l)*(sin(2*M_PI*fskTargetFreq2_l*vecX.at(i)+fskShift_l));
-            series->append(vecX.at(i), y);
+                tempY.append((fskAmp_l)*(sin(2*M_PI*fskTargetFreq2_l*vecX.at(i)+fskShift_l)));
         }
+        if(dX->checkState()==2 || dP->checkState()==2 || dM->checkState()==2)
+        {
+            //multiplication of modulated signal and two carrier signals into separate arrays
+            for(int i=0; i<tempY.length(); i++)
+                tempY2.append(tempY.at(i)*(fskAmp_l)*(sin(2*M_PI*fskTargetFreq2_l*vecX.at(i)+fskShift_l)));
+            for(int i=0; i<tempY.length(); i++)
+                tempY[i] *= (fskAmp_l)*(sin(2*M_PI*fskTargetFreq1_l*vecX.at(i)+fskShift_l));
+        }
+        if(dP->checkState()==2 || dM->checkState()==2)
+        {
+            for(int b=0; b<bitLim; b++)
+            {
+                int bitLength = stepsVal/bitLim;
+                int bitStartStep = b*bitLength;
+                int bitEndStep = (b+1)*bitLength;
+                double integral = 0;
+                double integral2 = 0;
+                for(int i=bitStartStep; i<bitEndStep-1; i++)
+                {
+                    //trapezoid integral with step based on the same delta as series
+                    //               (a     +     b)       /2*           h
+                    integral += (tempY.at(i)+tempY.at(i+1))/2*(vecX.at(i+1)-vecX.at(i));
+                    tempY[i] = integral*1000;
+
+                    //this is integral of the second multiplied signal
+                    integral2 += (tempY2.at(i)+tempY2.at(i+1))/2*(vecX.at(i+1)-vecX.at(i));
+                    tempY2[i] = integral2*1000;
+
+                    //final integral
+                    tempY3.append(integral*1000-integral2*1000);
+                }
+            }
+        }
+        if(dM->checkState()==2)
+        {
+            //setting demodulated signal values based on h threshold
+            for(int i=0; i<tempY3.length() && i<tempY.length(); i++)
+                if(tempY3.at(i)>dh->value())
+                    tempY[i] = 1;
+                else
+                    tempY[i] = 0;
+        }
+        for(int i=0; i<vecX.length() && i<tempY.length(); i++)
+            series->append(vecX.at(i), tempY.at(i));
         chartView->chart()->addSeries(series);
+        if(dX->checkState()==2)
+        {
+            QLineSeries* series2 = new QLineSeries(this);
+            for(int i=0; i<vecX.length() && i<tempY2.length(); i++)
+                series2->append(vecX.at(i), tempY2.at(i));
+            chartView->chart()->addSeries(series2);
+        }
+        if(dP->checkState()==2)
+        {
+            QLineSeries* series2 = new QLineSeries(this);
+            QLineSeries* series3 = new QLineSeries(this);
+            for(int i=0; i<vecX.length() && i<tempY2.length() && i<tempY3.length(); i++)
+            {
+                series2->append(vecX.at(i), tempY2.at(i));
+                series3->append(vecX.at(i), tempY3.at(i));
+            }
+            chartView->chart()->addSeries(series2);
+            chartView->chart()->addSeries(series3);
+        }
     }
     if(psk->checkState()==2)
     {
-        double y;
+        QVector<double> tempY;
         QLineSeries* series = new QLineSeries(this);
         for(int i=0; i<stepsVal; i++)
         {
             if(vecY.at(i))
-                y = (pskAmp_l)*(sin(2*M_PI*pskTargetFreq_l*vecX.at(i)+pskShift1_l));
+                tempY.append((pskAmp_l)*(sin(2*M_PI*pskTargetFreq_l*vecX.at(i)+pskShift1_l)));
             else
-                y = (pskAmp_l)*(sin(2*M_PI*pskTargetFreq_l*vecX.at(i)+pskShift2_l));
-            series->append(vecX.at(i), y);
+                tempY.append((pskAmp_l)*(sin(2*M_PI*pskTargetFreq_l*vecX.at(i)+pskShift2_l)));
         }
+        if(dX->checkState()==2 || dP->checkState()==2 || dM->checkState()==2)
+        {
+            for(int i=0; i<tempY.length(); i++)
+                tempY[i] *= (pskAmp_l)*(sin(2*M_PI*pskTargetFreq_l*vecX.at(i)+pskShift1_l));
+        }
+        if(dP->checkState()==2 || dM->checkState()==2)
+        {
+            for(int b=0; b<bitLim; b++)
+            {
+                int bitLength = stepsVal/bitLim;
+                int bitStartStep = b*bitLength;
+                int bitEndStep = (b+1)*bitLength;
+                double integral = 0;
+                for(int i=bitStartStep; i<bitEndStep-1; i++)
+                {
+                    //               (a     +     b)       /2*           h
+                    integral += (tempY.at(i)+tempY.at(i+1))/2*(vecX.at(i+1)-vecX.at(i));
+                    tempY[i] = integral*1000;
+                }
+            }
+        }
+        if(dM->checkState()==2)
+        {
+            for(int i=0; i<tempY.length(); i++)
+                if(tempY.at(i)>dh->value())
+                    tempY[i] = 1;
+                else
+                    tempY[i] = 0;
+        }
+        for(int i=0; i<vecX.length() && i<tempY.length(); i++)
+            series->append(vecX.at(i), tempY.at(i));
         chartView->chart()->addSeries(series);
     }
     if(spectrum->checkState()==2)

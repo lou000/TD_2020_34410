@@ -23,7 +23,7 @@ SOURCES += \
     lab1/lab1.cpp \
     lab3/lab3.cpp \
     lab4/lab4.cpp \
-    lab5/lab5.cpp \
+    lab5/lab5_6.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -35,7 +35,7 @@ HEADERS += \
     lab1/lab1.h \
     lab3/lab3.h \
     lab4/lab4.h \
-    lab5/lab5.h \
+    lab5/lab5_6.h \
     mainwindow.h \
     qchartview_with_zoom_and_drag.h
 
