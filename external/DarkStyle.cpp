@@ -1,4 +1,4 @@
-/*
+﻿/*
 ###############################################################################
 #                                                                             #
 # The MIT License                                                             #
@@ -66,7 +66,7 @@ void DarkStyle::polish(QApplication *app) {
   QFile qfDarkstyle(QStringLiteral(":/darkstyle/darkstyle.qss"));
   if (qfDarkstyle.open(QIODevice::ReadOnly | QIODevice::Text)) {
     // set stylesheet
-    QString qsStylesheet = QString::fromLatin1(qfDarkstyle.readAll());
+    QString qsStylesheet = QString::fromUtf8(qfDarkstyle.readAll());
     app->setStyleSheet(qsStylesheet);
     qfDarkstyle.close();
   }
