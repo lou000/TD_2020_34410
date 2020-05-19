@@ -333,16 +333,25 @@ QBitArray Lab7::decTTL(int clockFreq, LabSeries mod)
 QBitArray Lab7::decManchester(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
-    double x = 0;
+    double x = (1/static_cast<double>(clockFreq))/4;
     bits.fill(false, static_cast<int>((mod.xVec.last()-mod.xVec.first())/x));
     int bit = 0;
+    bool cycle = false;
+    int first = 0;
+    int second = 0;
     for(int i=0; x<mod.xVec.last(); i++)
     {
         if(mod.xVec.at(i)>x)
         {
-            x+=1/static_cast<double>(clockFreq);
+            x+=(1/static_cast<double>(clockFreq))/2;
+            first = round(mod.yVec.at(i));
             bits.setBit(bit, mod.yVec.at(i)==1 ? true : false);
-            bit++;
+            if(cycle==true)
+            {
+
+            }
+            else
+                cycle=true;
         }
     }
     bits.resize(bit);
