@@ -32,8 +32,9 @@ struct LabSeries
 {
     QVector<double> xVec;
     QVector<double> yVec;
+    QString name;
 
-    explicit LabSeries(QVector<double> x, QVector<double> y)
+    explicit LabSeries(QVector<double> x, QVector<double> y, const QString& n) : name(n)
     {
         Q_ASSERT_X(x.length()==y.length(), "LabSeries constructor", "Length of vectors is not equal");
         xVec = x;
@@ -47,7 +48,7 @@ class Lab7 : public QWidget
 public:
     explicit Lab7(QWidget *parent = nullptr);
     void displaySeries();
-    void addSeriesToChart(QVector<LabSeries> series);
+    void addSeriesToChart(QVector<LabSeries> series, double offset);
 
     LabSeries genCLK(double freq, double from, double to, int steps);
 
@@ -58,8 +59,8 @@ public:
 
     QBitArray decTTL(int clockFreq, LabSeries mod);
     QBitArray decManchester(int clockFreq, LabSeries mod);
-    QBitArray decNRZI(LabSeries clock, LabSeries mod);
-    QBitArray decBAMI(LabSeries clock, LabSeries mod);
+    QBitArray decNRZI(int clockFreq, LabSeries mod);
+    QBitArray decBAMI(int clockFreq, LabSeries mod);
 
     QBitArray bitsFromString(QString s, Endian e);
     QString stringFromBits(QBitArray bits, Endian e);

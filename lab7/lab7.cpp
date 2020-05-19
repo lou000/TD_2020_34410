@@ -132,6 +132,7 @@ Lab7::Lab7(QWidget *parent) : QWidget(parent)
     QObject::connect(ttl, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(man, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(nrzi, &QCheckBox::stateChanged, this, [=]{displaySeries();});
+    QObject::connect(bami, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(decode, &QCheckBox::stateChanged, this, [=]{displaySeries();});
 
     QObject::connect(input, &QLineEdit::textEdited, this, [=]{displaySeries();});
@@ -173,46 +174,54 @@ void Lab7::displaySeries()
     {
         auto mMan = modManchester(clkSignal, bits);
         labSeries.append(mMan);
-//        if(decode->checkState()==2)
-//            decodeOutput->appendPlainText("Manchester: "+stringFromBits(decManchester(clkSignal, mMan), endianVal)+"\n");
+        if(decode->checkState()==2)
+            decodeOutput->appendPlainText("Manchester :  "+stringFromBits(decManchester(clkVal, mMan), endianVal)+"\n");
     }
-//    if(nrzi->checkState()==0)
-//    {
-//        auto mNRZI = modNRZI(clkSignal, bits);
-//        labSeries.append(mNRZI);
-//        if(decode->checkState()==2)
-//            decodeOutput->appendPlainText("NRZI: "+stringFromBits(decNRZI(clkSignal, mNRZI), endianVal)+"\n");
-//    }
-//    if(bami->checkState()==0)
-//    {
-//        auto mBAMI = modBAMI(clkSignal, bits);
-//        labSeries.append(mBAMI);
-//        if(decode->checkState()==2)
-//            decodeOutput->appendPlainText("BAMI: "+stringFromBits(decBAMI(clkSignal, mBAMI), endianVal)+"\n");
-//    }
-    chartView->chart()->removeAllSeries();
-    addSeriesToChart(labSeries);
-    chartView->chart()->createDefaultAxes();
-    if(chartView->chart()->axes(Qt::Vertical).length()>0)
+    if(nrzi->checkState()==2)
     {
-        QValueAxis* axisY = (QValueAxis*)chartView->chart()->axes(Qt::Vertical)[0];
-        double addRange = (axisY->max() - axisY->min())*2;
-        axisY->setMax(axisY->max()+addRange);
-        axisY->setMin(axisY->min()-addRange);
+        auto mNRZI = modNRZI(clkSignal, bits);
+        labSeries.append(mNRZI);
+        if(decode->checkState()==2)
+            decodeOutput->appendPlainText("NRZI :  "+stringFromBits(decNRZI(clkVal, mNRZI), endianVal)+"\n");
     }
+    if(bami->checkState()==2)
+    {
+        auto mBAMI = modBAMI(clkSignal, bits);
+        labSeries.append(mBAMI);
+        if(decode->checkState()==2)
+            decodeOutput->appendPlainText("BAMI :  "+stringFromBits(decBAMI(clkVal, mBAMI), endianVal)+"\n");
+    }
+    chartView->chart()->removeAllSeries();
+    addSeriesToChart(labSeries, 3);
 }
 
 
-void Lab7::addSeriesToChart(QVector<LabSeries> series)
+void Lab7::addSeriesToChart(QVector<LabSeries> series, double offset)
 {
+    double total = 0;
     for(auto s : series)
     {
         auto temp = new QLineSeries();
         for(int i=0; i<s.xVec.length(); i++)
         {
-            temp->append(s.xVec.at(i), s.yVec.at(i));
+            temp->append(s.xVec.at(i), s.yVec.at(i) + offset + total);
         }
+        temp->setName(s.name);
         chartView->chart()->addSeries(temp);
+        total+=offset;
+    }
+
+    chartView->chart()->createDefaultAxes();
+    if(chartView->chart()->axes(Qt::Vertical).length()>0)
+    {
+        QValueAxis* axisY = (QValueAxis*)chartView->chart()->axes(Qt::Vertical)[0];
+        double addRange = (axisY->max() - axisY->min())*0.10;
+        axisY->setLabelFormat(" ");
+        axisY->setTickType(QValueAxis::TicksDynamic);
+        axisY->setTickAnchor(3);
+        axisY->setTickInterval(offset);
+        axisY->setMax(axisY->max()+addRange);
+        axisY->setMin(axisY->min()-addRange);
     }
 }
 
@@ -233,7 +242,7 @@ LabSeries Lab7::genCLK(double freq, double from, double to, int steps)
         else
             y.append(1);
     }
-    return LabSeries(x, y);
+    return LabSeries(x, y, "CLK");
 }
 
 LabSeries Lab7::modTTL(LabSeries clock, QBitArray bits)
@@ -258,7 +267,7 @@ LabSeries Lab7::modTTL(LabSeries clock, QBitArray bits)
             y.append(bits.at(bit));
         x.append(clock.xVec.at(i));
     }
-    return LabSeries(x, y);
+    return LabSeries(x, y, "TTL");
 }
 
 LabSeries Lab7::modManchester(LabSeries clock, QBitArray bits)
@@ -298,31 +307,82 @@ LabSeries Lab7::modManchester(LabSeries clock, QBitArray bits)
         y.append(mod);
         x.append(clock.xVec.at(i));
     }
-    return LabSeries(x, y);
+    return LabSeries(x, y, "Manchester");
 }
 
-//LabSeries Lab7::modNRZI(LabSeries clock, QBitArray bits)
-//{
+LabSeries Lab7::modNRZI(LabSeries clock, QBitArray bits)
+{
+    QVector<double> y;
+    QVector<double> x;
 
-//}
+    int prevClock = round(clock.yVec.first());
+    int mod = 0;
+    for(int i=0, bit=0; i<clock.yVec.length();i++)
+    {
+        int clk = round(clock.yVec.at(i));
+        if(prevClock==1 && clk == 0 && bit<bits.count())
+        {
+            if(bits.at(bit))
+                mod = (mod >= 0) ? -1 : 1;
+            bit++;
+        }
+        prevClock = clk;
+        y.append(mod);
+        x.append(clock.xVec.at(i));
+    }
+    return LabSeries(x, y, "NRZI");
+}
 
-//LabSeries Lab7::modBAMI(LabSeries clock, QBitArray bits)
-//{
+LabSeries Lab7::modBAMI(LabSeries clock, QBitArray bits)
+{
+    QVector<double> y;
+    QVector<double> x;
 
-//}
+    int prevClock = round(clock.yVec.first());
+    int mod = 0;
+    bool counter = 0;
+    for(int i=0, bit=0; i<clock.yVec.length() && bit<bits.count()+1;i++)
+    {
+        int clk = round(clock.yVec.at(i));
+        if(prevClock==1 && clk == 0 && bit<bits.count())
+        {
+            if(bits.at(bit))
+            {
+                if(counter)
+                {
+                    mod = -1;
+                    counter = false;
+                }
+                else
+                {
+                    mod = 1;
+                    counter = true;
+                }
+            }
+            else
+                mod = 0;
+            bit++;
+        }
+        prevClock = clk;
+        y.append(mod);
+        x.append(clock.xVec.at(i));
+    }
+    return LabSeries(x, y, "BAMI");
+}
 
 QBitArray Lab7::decTTL(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
-    double x = (1/static_cast<double>(clockFreq))/2;
+    double step = (1/static_cast<double>(clockFreq));
+    double x = step/2;
     bits.fill(false, static_cast<int>((mod.xVec.last()-mod.xVec.first())/x));
     int bit = 0;
     for(int i=0; x<mod.xVec.last(); i++)
     {
         if(mod.xVec.at(i)>x)
         {
-            x+=1/static_cast<double>(clockFreq);
-            bits.setBit(bit, mod.yVec.at(i)==1 ? true : false);
+            x+=step;
+            bits.setBit(bit, mod.yVec.at(i)==1);
             bit++;
         }
     }
@@ -333,7 +393,8 @@ QBitArray Lab7::decTTL(int clockFreq, LabSeries mod)
 QBitArray Lab7::decManchester(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
-    double x = (1/static_cast<double>(clockFreq))/4;
+    double step = (1/static_cast<double>(clockFreq))/2;
+    double x = step/2;
     bits.fill(false, static_cast<int>((mod.xVec.last()-mod.xVec.first())/x));
     int bit = 0;
     bool cycle = false;
@@ -343,30 +404,70 @@ QBitArray Lab7::decManchester(int clockFreq, LabSeries mod)
     {
         if(mod.xVec.at(i)>x)
         {
-            x+=(1/static_cast<double>(clockFreq))/2;
-            first = round(mod.yVec.at(i));
-            bits.setBit(bit, mod.yVec.at(i)==1 ? true : false);
-            if(cycle==true)
+            if(cycle==false)
             {
-
+                first = round(mod.yVec.at(i));
+                cycle = true;
+                x+=step;
             }
             else
-                cycle=true;
+            {
+                second = round(mod.yVec.at(i));
+                bool newBit = first >= 0 && second <= 0;
+                bits.setBit(bit, newBit);
+                bit++;
+                cycle = false;
+                x+=step;
+            }
         }
     }
     bits.resize(bit);
     return bits;
 }
 
-//QBitArray Lab7::decNRZI(LabSeries clock, LabSeries mod)
-//{
+QBitArray Lab7::decNRZI(int clockFreq, LabSeries mod)
+{
+    QBitArray bits;
+    double step = (1/static_cast<double>(clockFreq));
+    double x = step*0.75;
+    bits.fill(false, static_cast<int>((mod.xVec.last()-mod.xVec.first())/x));
+    int prevBit = 0;
+    int bit = 0;
+    for(int i=0; x<mod.xVec.last(); i++)
+    {
+        if(mod.xVec.at(i)>x)
+        {
+            x+=step;
+            bool newBit = mod.yVec.at(i) != prevBit;
+            prevBit = mod.yVec.at(i);
+            bits.setBit(bit, newBit);
+            bit++;
+        }
+    }
+    bits.resize(bit);
+    return bits;
+}
 
-//}
-
-//QBitArray Lab7::decBAMI(LabSeries clock, LabSeries mod)
-//{
-
-//}
+QBitArray Lab7::decBAMI(int clockFreq, LabSeries mod)
+{
+    QBitArray bits;
+    double step = (1/static_cast<double>(clockFreq));
+    double x = step*0.75;
+    bits.fill(false, static_cast<int>((mod.xVec.last()-mod.xVec.first())/x));
+    int bit = 0;
+    for(int i=0; x<mod.xVec.last(); i++)
+    {
+        if(mod.xVec.at(i)>x)
+        {
+            x+=step;
+            bool newBit = mod.yVec.at(i) != 0;
+            bits.setBit(bit, newBit);
+            bit++;
+        }
+    }
+    bits.resize(bit);
+    return bits;
+}
 
 QBitArray Lab7::bitsFromString(QString s, Endian e)
 {
@@ -383,7 +484,6 @@ QString Lab7::stringFromBits(QBitArray bits, Endian e)
     if(e == LittleEndian)
         reverseBitsInBytes(bits);
     const char* c = bits.bits();
-    qDebug()<<c<<QString(c);
     return QString(c);
 }
 
