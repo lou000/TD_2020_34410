@@ -130,7 +130,11 @@ QDockWidget::float-button{
   right:25px;
 }
 QGroupBox{
+  font-size: 14px;
+  font-weight: bold;
+  color: rgba(160,160,160,100%);
   background-color:rgba(66,66,66,50%);
+  padding-top: 5px;
   margin-top:12px;
   border:1px solid rgba(25,25,25,127);
   border-radius:4px;
