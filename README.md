@@ -12,7 +12,7 @@ Wprowadzono również elementy UI do zmiany parametrów, podobnie jak pokazano w
 * ## Laboratorium nr 2. - http://wernik.zut.edu.pl/td/probkowanie-i-kwantyzacja/
 Możliwa jest zmiana parametrów funkcji jak i rozdzielczości kwantyzacji.
 Udało się również rozszerzyć funkcjonalność Qt dodając przybliżanie i przeciąganie wykresów.
-![image](https://github.com/lou000/TD_2020_34410/blob/master/lab2/Lab2.png)
+![demo](https://github.com/lou000/TD_2020_34410/blob/master/lab2/lab_2_gif.gif)
 
 * ## Laboratorium nr 3. - http://wernik.zut.edu.pl/td/dyskretna-transformata-fouriera/
 Implementacja DFT oraz IDFT zgodnie z poleceniem. 
