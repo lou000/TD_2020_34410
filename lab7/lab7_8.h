@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QtMath>
+#include "QGenericMatrix"
 #include <QRandomGenerator>
 
 #include <QChart>
@@ -42,11 +43,11 @@ struct LabSeries
     }
 };
 
-class Lab7 : public QWidget
+class Lab7_8 : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Lab7(QWidget *parent = nullptr);
+    explicit Lab7_8(QWidget *parent = nullptr);
     void displaySeries();
     void addSeriesToChart(QVector<LabSeries> series, double offset);
 
@@ -61,6 +62,9 @@ public:
     QBitArray decManchester(int clockFreq, LabSeries mod);
     QBitArray decNRZI(int clockFreq, LabSeries mod);
     QBitArray decBAMI(int clockFreq, LabSeries mod);
+
+    QBitArray encodeHamming_4bit(QBitArray bits);
+    QBitArray decHamming_4bit(QBitArray bits);
 
     QBitArray bitsFromString(QString s, Endian e);
     QString stringFromBits(QBitArray bits, Endian e);
@@ -83,6 +87,7 @@ public:
     QSpinBox* bitLimit;
     QComboBox* endian;
 
+    QCheckBox* hamming;
     QPlainTextEdit* decodeOutput;
 };
 

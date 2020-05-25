@@ -32,11 +32,11 @@ enum Endian
     LittleEndian
 };
 
-class Lab5 : public QWidget
+class Lab5_6 : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Lab5(QWidget *parent = nullptr);
+    explicit Lab5_6(QWidget *parent = nullptr);
     void calculateSeries();
     QBitArray bitsFromString(QString s, Endian e);
     void reverseBitArray(QBitArray &arr);

@@ -1,6 +1,6 @@
 ﻿#include "lab5_6.h"
 
-Lab5::Lab5(QWidget *parent) : QWidget(parent)
+Lab5_6::Lab5_6(QWidget *parent) : QWidget(parent)
 {
     auto chart = new QChart();
     this->chartView = new QChartViewWithZoomAndDrag(chart, this);
@@ -405,7 +405,7 @@ Lab5::Lab5(QWidget *parent) : QWidget(parent)
     calculateSeries();
 }
 
-void Lab5::calculateSeries()
+void Lab5_6::calculateSeries()
 {
     chartView->chart()->removeAllSeries();
     QVector<double> vecX;
@@ -702,7 +702,7 @@ void Lab5::calculateSeries()
     }
 }
 
-QBitArray Lab5::bitsFromString(QString s, Endian e)
+QBitArray Lab5_6::bitsFromString(QString s, Endian e)
 {
     QByteArray ba = s.toLocal8Bit();
     const char* c = ba.data();
@@ -711,7 +711,7 @@ QBitArray Lab5::bitsFromString(QString s, Endian e)
         reverseBitArray(bitArr);
     return bitArr;
 }
-void Lab5::reverseBitArray(QBitArray &arr)
+void Lab5_6::reverseBitArray(QBitArray &arr)
 {
     for(int i=0; i<arr.count()/2;i++)
     {

@@ -1,6 +1,6 @@
-﻿#include "lab7.h"
+﻿#include "lab7_8.h"
 
-Lab7::Lab7(QWidget *parent) : QWidget(parent)
+Lab7_8::Lab7_8(QWidget *parent) : QWidget(parent)
 {
     auto chart = new QChart();
     this->chartView = new QChartViewWithZoomAndDrag(chart, this);
@@ -112,6 +112,17 @@ Lab7::Lab7(QWidget *parent) : QWidget(parent)
 
     leftBarLayout->addWidget(range, 2, 0 , 1, 4, Qt::AlignHCenter);
 
+    /////////////RANGE SELECTION GROUP/////////////
+    auto hammingCode = new QGroupBox("Hamming Code:", this);
+    auto hamLayout = new QGridLayout();
+    hammingCode->setLayout(hamLayout);
+    hammingCode->setMinimumWidth(200);
+    hammingCode->setMaximumHeight(150);
+    this->hamming = new QCheckBox("Enable");
+    hamLayout->addWidget(hamming, 0, 0, 1, 2, Qt::AlignLeft);
+
+    leftBarLayout->addWidget(hammingCode, 3, 0 , 1, 4, Qt::AlignHCenter);
+
 
     /////////////DECODE OUTPUT////////////////
     auto dec = new QGroupBox("Decode output:", this);
@@ -124,7 +135,7 @@ Lab7::Lab7(QWidget *parent) : QWidget(parent)
     decodeOutput->setMinimumHeight(100);
     decLayout->addWidget(decodeOutput,0,0, Qt::AlignHCenter);
 
-    leftBarLayout->addWidget(dec, 3, 0 , 1, 4, Qt::AlignHCenter);
+    leftBarLayout->addWidget(dec, 4, 0 , 1, 4, Qt::AlignHCenter);
 
 
     QObject::connect(clk, &QCheckBox::stateChanged, this, [=]{displaySeries();});
@@ -133,6 +144,7 @@ Lab7::Lab7(QWidget *parent) : QWidget(parent)
     QObject::connect(man, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(nrzi, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(bami, &QCheckBox::stateChanged, this, [=]{displaySeries();});
+    QObject::connect(hamming, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(decode, &QCheckBox::stateChanged, this, [=]{displaySeries();});
 
     QObject::connect(input, &QLineEdit::textEdited, this, [=]{displaySeries();});
@@ -145,7 +157,7 @@ Lab7::Lab7(QWidget *parent) : QWidget(parent)
     displaySeries();
 }
 
-void Lab7::displaySeries()
+void Lab7_8::displaySeries()
 {
     QVector<LabSeries> labSeries;
     double rangeF = rangeFrom->value();
@@ -158,6 +170,10 @@ void Lab7::displaySeries()
 
     LabSeries clkSignal = genCLK(clkVal, rangeF, rangeT, stepsVal);
     QBitArray bits = bitsFromString(inputVal, endianVal);
+
+    if(hamming->checkState()==2)
+        bits = encodeHamming_4bit(bits);
+
     bits.resize(bitLimitVal);
     decodeOutput->clear();
 
@@ -168,35 +184,56 @@ void Lab7::displaySeries()
         auto mTTL = modTTL(clkSignal, bits);
         labSeries.append(mTTL);
         if(decode->checkState()==2)
-            decodeOutput->appendPlainText("TTL :  "+stringFromBits(decTTL(clkVal, mTTL), endianVal)+"\n");
+        {
+            if(hamming->checkState()==2)
+                decodeOutput->appendPlainText("TTL :  "+stringFromBits(decHamming_4bit(decTTL(clkVal, mTTL)), endianVal)+"\n");
+            else
+                decodeOutput->appendPlainText("TTL :  "+stringFromBits(decTTL(clkVal, mTTL), endianVal)+"\n");
+
+        }
     }
     if(man->checkState()==2)
     {
         auto mMan = modManchester(clkSignal, bits);
         labSeries.append(mMan);
         if(decode->checkState()==2)
-            decodeOutput->appendPlainText("Manchester :  "+stringFromBits(decManchester(clkVal, mMan), endianVal)+"\n");
+        {
+            if(hamming->checkState()==2)
+                decodeOutput->appendPlainText("Manchester :  "+stringFromBits(decHamming_4bit(decManchester(clkVal, mMan)), endianVal)+"\n");
+            else
+                decodeOutput->appendPlainText("Manchester :  "+stringFromBits(decManchester(clkVal, mMan), endianVal)+"\n");
+        }
     }
     if(nrzi->checkState()==2)
     {
         auto mNRZI = modNRZI(clkSignal, bits);
         labSeries.append(mNRZI);
         if(decode->checkState()==2)
-            decodeOutput->appendPlainText("NRZI :  "+stringFromBits(decNRZI(clkVal, mNRZI), endianVal)+"\n");
+        {
+            if(hamming->checkState()==2)
+                decodeOutput->appendPlainText("NRZI :  "+stringFromBits(decHamming_4bit(decNRZI(clkVal, mNRZI)), endianVal)+"\n");
+            else
+                decodeOutput->appendPlainText("NRZI :  "+stringFromBits(decNRZI(clkVal, mNRZI), endianVal)+"\n");
+        }
     }
     if(bami->checkState()==2)
     {
         auto mBAMI = modBAMI(clkSignal, bits);
         labSeries.append(mBAMI);
         if(decode->checkState()==2)
-            decodeOutput->appendPlainText("BAMI :  "+stringFromBits(decBAMI(clkVal, mBAMI), endianVal)+"\n");
+        {
+            if(hamming->checkState()==2)
+                decodeOutput->appendPlainText("BAMI :  "+stringFromBits(decHamming_4bit(decBAMI(clkVal, mBAMI)), endianVal)+"\n");
+            else
+                decodeOutput->appendPlainText("BAMI :  "+stringFromBits(decBAMI(clkVal, mBAMI), endianVal)+"\n");
+        }
     }
     chartView->chart()->removeAllSeries();
     addSeriesToChart(labSeries, 3);
 }
 
 
-void Lab7::addSeriesToChart(QVector<LabSeries> series, double offset)
+void Lab7_8::addSeriesToChart(QVector<LabSeries> series, double offset)
 {
     double total = 0;
     for(auto s : series)
@@ -225,7 +262,7 @@ void Lab7::addSeriesToChart(QVector<LabSeries> series, double offset)
     }
 }
 
-LabSeries Lab7::genCLK(double freq, double from, double to, int steps)
+LabSeries Lab7_8::genCLK(double freq, double from, double to, int steps)
 {
     QVector<double> x;
     QVector<double> y;
@@ -245,7 +282,7 @@ LabSeries Lab7::genCLK(double freq, double from, double to, int steps)
     return LabSeries(x, y, "CLK");
 }
 
-LabSeries Lab7::modTTL(LabSeries clock, QBitArray bits)
+LabSeries Lab7_8::modTTL(LabSeries clock, QBitArray bits)
 {
     QVector<double> y;
     QVector<double> x;
@@ -270,7 +307,7 @@ LabSeries Lab7::modTTL(LabSeries clock, QBitArray bits)
     return LabSeries(x, y, "TTL");
 }
 
-LabSeries Lab7::modManchester(LabSeries clock, QBitArray bits)
+LabSeries Lab7_8::modManchester(LabSeries clock, QBitArray bits)
 {
     QVector<double> y;
     QVector<double> x;
@@ -310,7 +347,7 @@ LabSeries Lab7::modManchester(LabSeries clock, QBitArray bits)
     return LabSeries(x, y, "Manchester");
 }
 
-LabSeries Lab7::modNRZI(LabSeries clock, QBitArray bits)
+LabSeries Lab7_8::modNRZI(LabSeries clock, QBitArray bits)
 {
     QVector<double> y;
     QVector<double> x;
@@ -333,7 +370,7 @@ LabSeries Lab7::modNRZI(LabSeries clock, QBitArray bits)
     return LabSeries(x, y, "NRZI");
 }
 
-LabSeries Lab7::modBAMI(LabSeries clock, QBitArray bits)
+LabSeries Lab7_8::modBAMI(LabSeries clock, QBitArray bits)
 {
     QVector<double> y;
     QVector<double> x;
@@ -370,7 +407,7 @@ LabSeries Lab7::modBAMI(LabSeries clock, QBitArray bits)
     return LabSeries(x, y, "BAMI");
 }
 
-QBitArray Lab7::decTTL(int clockFreq, LabSeries mod)
+QBitArray Lab7_8::decTTL(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
     double step = (1/static_cast<double>(clockFreq));
@@ -390,7 +427,7 @@ QBitArray Lab7::decTTL(int clockFreq, LabSeries mod)
     return bits;
 }
 
-QBitArray Lab7::decManchester(int clockFreq, LabSeries mod)
+QBitArray Lab7_8::decManchester(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
     double step = (1/static_cast<double>(clockFreq))/2;
@@ -425,7 +462,7 @@ QBitArray Lab7::decManchester(int clockFreq, LabSeries mod)
     return bits;
 }
 
-QBitArray Lab7::decNRZI(int clockFreq, LabSeries mod)
+QBitArray Lab7_8::decNRZI(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
     double step = (1/static_cast<double>(clockFreq));
@@ -448,7 +485,7 @@ QBitArray Lab7::decNRZI(int clockFreq, LabSeries mod)
     return bits;
 }
 
-QBitArray Lab7::decBAMI(int clockFreq, LabSeries mod)
+QBitArray Lab7_8::decBAMI(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
     double step = (1/static_cast<double>(clockFreq));
@@ -469,7 +506,102 @@ QBitArray Lab7::decBAMI(int clockFreq, LabSeries mod)
     return bits;
 }
 
-QBitArray Lab7::bitsFromString(QString s, Endian e)
+template <int N, int M, typename T>
+QGenericMatrix<N, M, T> operator%(const QGenericMatrix<N, M, T>& matrix, T factor)
+{
+    const T* data = matrix.constData();
+    T result[N*M];
+    for (int i = 0; i < M * N; i++)
+            result[i] = data[i] % factor;
+    QGenericMatrix<N, M, T> resultMatrix(result);
+    return resultMatrix;
+}
+
+QBitArray Lab7_8::encodeHamming_4bit(QBitArray bits)
+{
+    //if the array of bits is not divisible by 4 we ignore the remainder
+    //as it does not form proper byte anyway
+    QBitArray encodedBits;
+    encodedBits.fill(0, bits.count()*2);
+    if(bits.count()<4)
+        return encodedBits;
+    for(int i=0; i<bits.count(); i=i+4)
+    {
+        int valD[] = {bits.at(i),
+                     bits.at(i+1),
+                     bits.at(i+2),
+                     bits.at(i+3)
+                    };
+        QGenericMatrix<1, 4, int> d(valD);
+
+        int valG[] = {1, 1, 0, 1,
+                      1, 0, 1, 1,
+                      1, 0, 0, 0,
+                      0, 1, 1, 1,
+                      0, 1, 0, 0,
+                      0, 0, 1, 0,
+                      0, 0, 0, 1
+                     };
+        QGenericMatrix<4, 7, int> G(valG);
+        auto h = G * d;
+        auto hT = h.transposed()%2;
+        for(int j=0; j < 7; j++)
+            if(hT(0,j))
+                encodedBits.setBit(j+i*2);
+    }
+    return encodedBits;
+}
+
+QBitArray Lab7_8::decHamming_4bit(QBitArray bits)
+{
+    QBitArray decodedBits;
+    decodedBits.fill(0, bits.count()/2);
+    if(bits.count()<8)
+        return decodedBits;
+    for(int i=0; i<bits.count(); i=i+8)
+    {
+        int valD[] = {bits.at(i),
+                      bits.at(i+1),
+                      bits.at(i+2),
+                      bits.at(i+3),
+                      bits.at(i+4),
+                      bits.at(i+5),
+                      bits.at(i+6),
+                     };
+        QGenericMatrix<1, 7, int> d(valD);
+
+        int valH[] = {1, 0, 1, 0, 1, 0, 1,
+                      0, 1, 1, 0, 0, 1, 1,
+                      0, 0, 0, 1, 1, 1, 1
+                     };
+
+        QGenericMatrix<7, 3, int> H(valH);
+        auto p = (H * d) % 2;
+        bool discard = false;
+        int n = p(0,0)*1 + p(1,0)*2 + p(2,0)*4;
+        if(n>0)
+        {
+            valD[n-1] = valD[n-1]==0 ? 1 : 0;
+            QGenericMatrix<1, 7, int> d2(valD);
+            auto p2 = (H * d2) % 2;
+            int n2 = p2(0,0)*1 + p2(1,0)*2 + p2(2,0)*4;
+            if(n2)
+                discard = true;
+        }
+        if(!discard)
+        {
+            int res[4] = {valD[2], valD[4], valD[5], valD[6]};
+            for(int j=0; j<4; j++)
+                if(res[j])
+                    decodedBits.setBit(j+i/2);
+        }
+    }
+    qDebug()<<decodedBits;
+    return decodedBits;
+}
+
+
+QBitArray Lab7_8::bitsFromString(QString s, Endian e)
 {
     QByteArray ba = s.toUtf8();
     const char* c = ba.data();
@@ -479,7 +611,7 @@ QBitArray Lab7::bitsFromString(QString s, Endian e)
     return bitArr;
 }
 
-QString Lab7::stringFromBits(QBitArray bits, Endian e)
+QString Lab7_8::stringFromBits(QBitArray bits, Endian e)
 {
     if(e == LittleEndian)
         reverseBitsInBytes(bits);
@@ -487,7 +619,7 @@ QString Lab7::stringFromBits(QBitArray bits, Endian e)
     return QString(c);
 }
 
-void Lab7::reverseBitsInBytes(QBitArray &arr)
+void Lab7_8::reverseBitsInBytes(QBitArray &arr)
 {
     //if byte is incomplete we dont reverse it
     for(int j = 1; j<=arr.count()/8; j++)
