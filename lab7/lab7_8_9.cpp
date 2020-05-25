@@ -1,6 +1,6 @@
-﻿#include "lab7_8.h"
+﻿#include "lab7_8_9.h"
 
-Lab7_8::Lab7_8(QWidget *parent) : QWidget(parent)
+Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
 {
     auto chart = new QChart();
     this->chartView = new QChartViewWithZoomAndDrag(chart, this);
@@ -157,7 +157,7 @@ Lab7_8::Lab7_8(QWidget *parent) : QWidget(parent)
     displaySeries();
 }
 
-void Lab7_8::displaySeries()
+void Lab7_8_9::displaySeries()
 {
     QVector<LabSeries> labSeries;
     double rangeF = rangeFrom->value();
@@ -233,7 +233,7 @@ void Lab7_8::displaySeries()
 }
 
 
-void Lab7_8::addSeriesToChart(QVector<LabSeries> series, double offset)
+void Lab7_8_9::addSeriesToChart(QVector<LabSeries> series, double offset)
 {
     double total = 0;
     for(auto s : series)
@@ -262,7 +262,7 @@ void Lab7_8::addSeriesToChart(QVector<LabSeries> series, double offset)
     }
 }
 
-LabSeries Lab7_8::genCLK(double freq, double from, double to, int steps)
+LabSeries Lab7_8_9::genCLK(double freq, double from, double to, int steps)
 {
     QVector<double> x;
     QVector<double> y;
@@ -282,7 +282,7 @@ LabSeries Lab7_8::genCLK(double freq, double from, double to, int steps)
     return LabSeries(x, y, "CLK");
 }
 
-LabSeries Lab7_8::modTTL(LabSeries clock, QBitArray bits)
+LabSeries Lab7_8_9::modTTL(LabSeries clock, QBitArray bits)
 {
     QVector<double> y;
     QVector<double> x;
@@ -307,7 +307,7 @@ LabSeries Lab7_8::modTTL(LabSeries clock, QBitArray bits)
     return LabSeries(x, y, "TTL");
 }
 
-LabSeries Lab7_8::modManchester(LabSeries clock, QBitArray bits)
+LabSeries Lab7_8_9::modManchester(LabSeries clock, QBitArray bits)
 {
     QVector<double> y;
     QVector<double> x;
@@ -347,7 +347,7 @@ LabSeries Lab7_8::modManchester(LabSeries clock, QBitArray bits)
     return LabSeries(x, y, "Manchester");
 }
 
-LabSeries Lab7_8::modNRZI(LabSeries clock, QBitArray bits)
+LabSeries Lab7_8_9::modNRZI(LabSeries clock, QBitArray bits)
 {
     QVector<double> y;
     QVector<double> x;
@@ -370,7 +370,7 @@ LabSeries Lab7_8::modNRZI(LabSeries clock, QBitArray bits)
     return LabSeries(x, y, "NRZI");
 }
 
-LabSeries Lab7_8::modBAMI(LabSeries clock, QBitArray bits)
+LabSeries Lab7_8_9::modBAMI(LabSeries clock, QBitArray bits)
 {
     QVector<double> y;
     QVector<double> x;
@@ -407,7 +407,7 @@ LabSeries Lab7_8::modBAMI(LabSeries clock, QBitArray bits)
     return LabSeries(x, y, "BAMI");
 }
 
-QBitArray Lab7_8::decTTL(int clockFreq, LabSeries mod)
+QBitArray Lab7_8_9::decTTL(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
     double step = (1/static_cast<double>(clockFreq));
@@ -427,7 +427,7 @@ QBitArray Lab7_8::decTTL(int clockFreq, LabSeries mod)
     return bits;
 }
 
-QBitArray Lab7_8::decManchester(int clockFreq, LabSeries mod)
+QBitArray Lab7_8_9::decManchester(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
     double step = (1/static_cast<double>(clockFreq))/2;
@@ -462,7 +462,7 @@ QBitArray Lab7_8::decManchester(int clockFreq, LabSeries mod)
     return bits;
 }
 
-QBitArray Lab7_8::decNRZI(int clockFreq, LabSeries mod)
+QBitArray Lab7_8_9::decNRZI(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
     double step = (1/static_cast<double>(clockFreq));
@@ -485,7 +485,7 @@ QBitArray Lab7_8::decNRZI(int clockFreq, LabSeries mod)
     return bits;
 }
 
-QBitArray Lab7_8::decBAMI(int clockFreq, LabSeries mod)
+QBitArray Lab7_8_9::decBAMI(int clockFreq, LabSeries mod)
 {
     QBitArray bits;
     double step = (1/static_cast<double>(clockFreq));
@@ -517,7 +517,7 @@ QGenericMatrix<N, M, T> operator%(const QGenericMatrix<N, M, T>& matrix, T facto
     return resultMatrix;
 }
 
-QBitArray Lab7_8::encodeHamming_4bit(QBitArray bits)
+QBitArray Lab7_8_9::encodeHamming_4bit(QBitArray bits)
 {
     //if the array of bits is not divisible by 4 we ignore the remainder
     //as it does not form proper byte anyway
@@ -552,7 +552,7 @@ QBitArray Lab7_8::encodeHamming_4bit(QBitArray bits)
     return encodedBits;
 }
 
-QBitArray Lab7_8::decHamming_4bit(QBitArray bits)
+QBitArray Lab7_8_9::decHamming_4bit(QBitArray bits)
 {
     QBitArray decodedBits;
     decodedBits.fill(0, bits.count()/2);
@@ -601,7 +601,7 @@ QBitArray Lab7_8::decHamming_4bit(QBitArray bits)
 }
 
 
-QBitArray Lab7_8::bitsFromString(QString s, Endian e)
+QBitArray Lab7_8_9::bitsFromString(QString s, Endian e)
 {
     QByteArray ba = s.toUtf8();
     const char* c = ba.data();
@@ -611,7 +611,7 @@ QBitArray Lab7_8::bitsFromString(QString s, Endian e)
     return bitArr;
 }
 
-QString Lab7_8::stringFromBits(QBitArray bits, Endian e)
+QString Lab7_8_9::stringFromBits(QBitArray bits, Endian e)
 {
     if(e == LittleEndian)
         reverseBitsInBytes(bits);
@@ -619,7 +619,7 @@ QString Lab7_8::stringFromBits(QBitArray bits, Endian e)
     return QString(c);
 }
 
-void Lab7_8::reverseBitsInBytes(QBitArray &arr)
+void Lab7_8_9::reverseBitsInBytes(QBitArray &arr)
 {
     //if byte is incomplete we dont reverse it
     for(int j = 1; j<=arr.count()/8; j++)
