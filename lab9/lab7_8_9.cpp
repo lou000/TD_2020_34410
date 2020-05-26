@@ -584,7 +584,7 @@ QBitArray Lab7_8_9::encodeHamming_4bit(QBitArray bits, int error)
 QBitArray Lab7_8_9::decHamming_4bit(QBitArray bits)
 {
     //if we introduce more than 2 errors this algorithm will not work
-    qDebug()<<"Encoded Data: "<<bits<<"\n";
+
     QBitArray decodedBits;
     decodedBits.fill(0, bits.count()/2);
     if(bits.count()<8)
