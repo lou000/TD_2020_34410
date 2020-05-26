@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     centralWidget->insertTab(2, new Lab3(centralWidget), "Lab3");
     centralWidget->insertTab(3, new Lab4(centralWidget), "Lab4");
     centralWidget->insertTab(4, new Lab5_6(centralWidget), "Lab5/6");
-    centralWidget->insertTab(5, new Lab7_8_9(centralWidget), "Lab7/8");
+    centralWidget->insertTab(5, new Lab7_8_9(centralWidget), "Lab7/8/9");
     centralWidget->setCurrentIndex(centralWidget->count()-1);
     this->setCentralWidget(centralWidget);
 }
