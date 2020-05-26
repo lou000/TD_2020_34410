@@ -29,10 +29,12 @@ Ze względu na podobieństwo tematów implementacja w obrębie jednej zakładki.
 Można wyświetlić wszystkie etapy demodulacji zgodnie ze schematami w poleceniu.
 ![demo](https://github.com/lou000/TD_2020_34410/blob/master/lab5/lab_5_6_gif.gif)
 
-* ## Laboratorium nr 7. - http://wernik.zut.edu.pl/td/kodowanie-transmisyjne-v2/
-Implementacja wszystkich algorytmów kodowania liniowego zawartych w poleceniu.
+* ## Laboratorium nr 7/8/9. - http://wernik.zut.edu.pl/td/kodowanie-transmisyjne-v2/
+Implementacja wszystkich algorytmów kodowania i dekodowania liniowego liniowego zawartych w poleceniu.
+Implementacja kodowania i dekodowania Hamminga z laboratorium 8 i toru transmisyjnego z laboratorium 10.
 Można dostosować częstotliwość zegara, limit bitów etc.
-Dekodowany output wyświetla się w oknie "Decode output", przy niepełnych bajtach może produkować śmieci.
+Dekodowany output wyświetla się w oknie "Decode output", przy niepełnych bajtach i może produkować śmieci.
+Algorytm do dekodowania Hamminga zachowuje się poprawnie jedynie dla 0, 1, i 2 błędów.
 ![demo](https://github.com/lou000/TD_2020_34410/blob/master/lab7/lab_7_gif.gif)
 
 
