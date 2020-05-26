@@ -31,20 +31,24 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     this->clkFrq = new QSpinBox(this);
     this->clkFrq->setAlignment(Qt::AlignRight);
     this->clkFrq->setMaximumWidth(80);
-    this->clkFrq->setMaximum(200);
+    this->clkFrq->setMaximum(50000);
     this->clkFrq->setMinimum(1);
-    this->clkFrq->setValue(16);
+    this->clkFrq->setValue(2500);
     msLayout->addWidget(new QLabel(" Freq:", this), 0, 1, Qt::AlignRight);
     msLayout->addWidget(clkFrq, 0, 2, Qt::AlignLeft);
     this->ttl = new QCheckBox("TTL");
     msLayout->addWidget(ttl, 1, 0, Qt::AlignLeft);
     this->man = new QCheckBox("Manchester");
+    this->man->setChecked(true);
     msLayout->addWidget(man, 1, 1, 1, 2, Qt::AlignLeft);
     this->nrzi = new QCheckBox("NRZI");
+    this->nrzi->setChecked(true);
     msLayout->addWidget(nrzi, 2, 0, Qt::AlignLeft);
     this->bami = new QCheckBox("BAMI");
+    this->bami->setChecked(true);
     msLayout->addWidget(bami, 2, 1, 1, 2, Qt::AlignLeft);
     this->decode = new QCheckBox("Decode");
+    this->decode->setChecked(true);
     msLayout->addWidget(decode, 3, 0, 1, 2, Qt::AlignLeft);
     leftBarLayout->addWidget(modSelection, 0, 0 , 1, 4, Qt::AlignHCenter);
 
@@ -55,7 +59,7 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     inputSettings->setLayout(inputLayout);
     inputSettings->setMinimumWidth(200);
 
-    this->input = new QLineEdit("51",this);
+    this->input = new QLineEdit("HALP ME PLEASE",this);
     inputLayout->addWidget(new QLabel("Input:", this), 0, 0, Qt::AlignLeft);
     inputLayout->addWidget(input, 0, 1, 1, 5, Qt::AlignHCenter);
 
@@ -64,7 +68,7 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     this->bitLimit->setMaximumWidth(80);
     this->bitLimit->setMaximum(999999);
     this->bitLimit->setMinimum(1);
-    this->bitLimit->setValue(16);
+    this->bitLimit->setValue(2000);
     inputLayout->addWidget(new QLabel("Bit Limit:", this), 1, 0, Qt::AlignLeft);
     inputLayout->addWidget(bitLimit, 1, 1, 1, 5, Qt::AlignHCenter);
 
@@ -97,7 +101,7 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     this->rangeTo->setMaximumWidth(50);
     this->rangeTo->setMaximum(999);
     this->rangeTo->setMinimum(-999);
-    this->rangeTo->setValue(1.0);
+    this->rangeTo->setValue(0.1);
     rangeLayout->addWidget(new QLabel("To:", this), 0, 2, Qt::AlignRight);
     rangeLayout->addWidget(rangeTo, 0, 3, Qt::AlignLeft);
 
@@ -106,13 +110,13 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     this->steps->setMaximumWidth(80);
     this->steps->setMaximum(999999);
     this->steps->setMinimum(1);
-    this->steps->setValue(1000);
+    this->steps->setValue(2000);
     rangeLayout->addWidget(new QLabel("Steps:", this), 1, 0, Qt::AlignLeft);
     rangeLayout->addWidget(steps, 1, 1, 1, 2, Qt::AlignLeft);
 
     leftBarLayout->addWidget(range, 2, 0 , 1, 4, Qt::AlignHCenter);
 
-    /////////////RANGE SELECTION GROUP/////////////
+    /////////////HAMMING CODE//////////////////////
     auto hammingCode = new QGroupBox("Hamming Code:", this);
     auto hamLayout = new QGridLayout();
     hammingCode->setLayout(hamLayout);
@@ -120,6 +124,15 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     hammingCode->setMaximumHeight(150);
     this->hamming = new QCheckBox("Enable");
     hamLayout->addWidget(hamming, 0, 0, 1, 2, Qt::AlignLeft);
+
+    this->errors = new QSpinBox(this);
+    this->errors->setAlignment(Qt::AlignRight);
+    this->errors->setMaximumWidth(80);
+    this->errors->setMaximum(7);
+    this->errors->setMinimum(0);
+    this->errors->setValue(1);
+    hamLayout->addWidget(new QLabel("Errors:", this), 0, 2, Qt::AlignRight);
+    hamLayout->addWidget(errors, 0, 3, Qt::AlignRight);
 
     leftBarLayout->addWidget(hammingCode, 3, 0 , 1, 4, Qt::AlignHCenter);
 
@@ -144,12 +157,14 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     QObject::connect(man, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(nrzi, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(bami, &QCheckBox::stateChanged, this, [=]{displaySeries();});
-    QObject::connect(hamming, &QCheckBox::stateChanged, this, [=]{displaySeries();});
     QObject::connect(decode, &QCheckBox::stateChanged, this, [=]{displaySeries();});
 
     QObject::connect(input, &QLineEdit::textEdited, this, [=]{displaySeries();});
     QObject::connect(bitLimit, &QSpinBox::textChanged, this, [=]{displaySeries();});
     QObject::connect(endian, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=]{displaySeries();});
+
+    QObject::connect(hamming, &QCheckBox::stateChanged, this, [=]{displaySeries();});
+    QObject::connect(errors, &QSpinBox::textChanged, this, [=]{displaySeries();});
 
     QObject::connect(rangeFrom, &QDoubleSpinBox::editingFinished, this, [=]{displaySeries();});
     QObject::connect(rangeTo, &QDoubleSpinBox::editingFinished, this, [=]{displaySeries();});
@@ -172,7 +187,7 @@ void Lab7_8_9::displaySeries()
     QBitArray bits = bitsFromString(inputVal, endianVal);
 
     if(hamming->checkState()==2)
-        bits = encodeHamming_4bit(bits);
+        bits = encodeHamming_4bit(bits, errors->value());
 
     bits.resize(bitLimitVal);
     decodeOutput->clear();
@@ -266,7 +281,7 @@ LabSeries Lab7_8_9::genCLK(double freq, double from, double to, int steps)
 {
     QVector<double> x;
     QVector<double> y;
-    double range = from-to;
+    double range = to-from;
     if(range<0)
         range = 1;
     double step = range/steps;
@@ -414,7 +429,7 @@ QBitArray Lab7_8_9::decTTL(int clockFreq, LabSeries mod)
     double x = step/2;
     bits.fill(false, static_cast<int>((mod.xVec.last()-mod.xVec.first())/x));
     int bit = 0;
-    for(int i=0; x<mod.xVec.last(); i++)
+    for(int i=0; x<mod.xVec.last() && i<mod.xVec.length(); i++)
     {
         if(mod.xVec.at(i)>x)
         {
@@ -437,7 +452,7 @@ QBitArray Lab7_8_9::decManchester(int clockFreq, LabSeries mod)
     bool cycle = false;
     int first = 0;
     int second = 0;
-    for(int i=0; x<mod.xVec.last(); i++)
+    for(int i=0; x<mod.xVec.last() && i<mod.xVec.length(); i++)
     {
         if(mod.xVec.at(i)>x)
         {
@@ -470,7 +485,7 @@ QBitArray Lab7_8_9::decNRZI(int clockFreq, LabSeries mod)
     bits.fill(false, static_cast<int>((mod.xVec.last()-mod.xVec.first())/x));
     int prevBit = 0;
     int bit = 0;
-    for(int i=0; x<mod.xVec.last(); i++)
+    for(int i=0; x<mod.xVec.last() && i<mod.xVec.length(); i++)
     {
         if(mod.xVec.at(i)>x)
         {
@@ -492,7 +507,7 @@ QBitArray Lab7_8_9::decBAMI(int clockFreq, LabSeries mod)
     double x = step*0.75;
     bits.fill(false, static_cast<int>((mod.xVec.last()-mod.xVec.first())/x));
     int bit = 0;
-    for(int i=0; x<mod.xVec.last(); i++)
+    for(int i=0; x<mod.xVec.last() && i<mod.xVec.length(); i++)
     {
         if(mod.xVec.at(i)>x)
         {
@@ -517,7 +532,7 @@ QGenericMatrix<N, M, T> operator%(const QGenericMatrix<N, M, T>& matrix, T facto
     return resultMatrix;
 }
 
-QBitArray Lab7_8_9::encodeHamming_4bit(QBitArray bits)
+QBitArray Lab7_8_9::encodeHamming_4bit(QBitArray bits, int error)
 {
     //if the array of bits is not divisible by 4 we ignore the remainder
     //as it does not form proper byte anyway
@@ -525,7 +540,7 @@ QBitArray Lab7_8_9::encodeHamming_4bit(QBitArray bits)
     encodedBits.fill(0, bits.count()*2);
     if(bits.count()<4)
         return encodedBits;
-    for(int i=0; i<bits.count(); i=i+4)
+    for(int i=0; i<bits.count()-3; i=i+4)
     {
         int valD[] = {bits.at(i),
                      bits.at(i+1),
@@ -545,20 +560,36 @@ QBitArray Lab7_8_9::encodeHamming_4bit(QBitArray bits)
         QGenericMatrix<4, 7, int> G(valG);
         auto h = G * d;
         auto hT = h.transposed()%2;
+        int p4 = 0;
         for(int j=0; j < 7; j++)
+        {
             if(hT(0,j))
                 encodedBits.setBit(j+i*2);
+            p4+=hT(0,j);
+        }
+        encodedBits.setBit(7+i*2, p4 % 2);
+
+        QVector<int> erroredBits;
+        erroredBits <<0<<1<<2<<3<<4<<5<<6<<7;
+        std::random_shuffle(erroredBits.begin(), erroredBits.end());
+        for(int j=0; j<error; j++)
+        {
+            encodedBits.toggleBit(erroredBits.at(j)+i*2);
+        }
     }
+    qDebug()<<"Encoded Data with"<<error<<"error(s) per byte: "<<encodedBits;
     return encodedBits;
 }
 
 QBitArray Lab7_8_9::decHamming_4bit(QBitArray bits)
 {
+    //if we introduce more than 2 errors this algorithm will not work
+
     QBitArray decodedBits;
-    decodedBits.fill(0, bits.count()/2);
+    decodedBits.fill(0, bits.count()/2-1);
     if(bits.count()<8)
         return decodedBits;
-    for(int i=0; i<bits.count(); i=i+8)
+    for(int i=0; i<bits.count()-7; i=i+8)
     {
         int valD[] = {bits.at(i),
                       bits.at(i+1),
@@ -579,15 +610,15 @@ QBitArray Lab7_8_9::decHamming_4bit(QBitArray bits)
         auto p = (H * d) % 2;
         bool discard = false;
         int n = p(0,0)*1 + p(1,0)*2 + p(2,0)*4;
-        if(n>0)
+        if(n)
         {
             valD[n-1] = valD[n-1]==0 ? 1 : 0;
-            QGenericMatrix<1, 7, int> d2(valD);
-            auto p2 = (H * d2) % 2;
-            int n2 = p2(0,0)*1 + p2(1,0)*2 + p2(2,0)*4;
-            if(n2)
+            int p4 = (valD[0]+valD[1]+valD[2]+valD[3]+valD[4]
+                      +valD[5]+valD[6])%2;
+            if(static_cast<bool>(p4) != bits.at(i+7))
                 discard = true;
         }
+        //if there are more bad bits we discard the result and return 0000
         if(!discard)
         {
             int res[4] = {valD[2], valD[4], valD[5], valD[6]};
@@ -596,7 +627,7 @@ QBitArray Lab7_8_9::decHamming_4bit(QBitArray bits)
                     decodedBits.setBit(j+i/2);
         }
     }
-    qDebug()<<decodedBits;
+    qDebug()<<"Decoded Data: "<<decodedBits<<"\n";
     return decodedBits;
 }
 

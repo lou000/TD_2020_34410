@@ -43,11 +43,11 @@ struct LabSeries
     }
 };
 
-class Lab7_8 : public QWidget
+class Lab7_8_9 : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Lab7_8(QWidget *parent = nullptr);
+    explicit Lab7_8_9(QWidget *parent = nullptr);
     void displaySeries();
     void addSeriesToChart(QVector<LabSeries> series, double offset);
 
@@ -63,7 +63,7 @@ public:
     QBitArray decNRZI(int clockFreq, LabSeries mod);
     QBitArray decBAMI(int clockFreq, LabSeries mod);
 
-    QBitArray encodeHamming_4bit(QBitArray bits);
+    QBitArray encodeHamming_4bit(QBitArray bits, int error);
     QBitArray decHamming_4bit(QBitArray bits);
 
     QBitArray bitsFromString(QString s, Endian e);
@@ -88,6 +88,7 @@ public:
     QComboBox* endian;
 
     QCheckBox* hamming;
+    QSpinBox* errors;
     QPlainTextEdit* decodeOutput;
 };
 
