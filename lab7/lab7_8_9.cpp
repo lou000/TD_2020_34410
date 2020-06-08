@@ -134,8 +134,30 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     hamLayout->addWidget(new QLabel("Errors:", this), 0, 2, Qt::AlignRight);
     hamLayout->addWidget(errors, 0, 3, Qt::AlignRight);
 
-    leftBarLayout->addWidget(hammingCode, 3, 0 , 1, 4, Qt::AlignHCenter);
+    leftBarLayout->addWidget(hammingCode, 3, 0, 1, 4, Qt::AlignHCenter);
 
+    ///////////////////NOISE//////////////////
+    auto noiseBox = new QGroupBox("Noise:", this);
+    auto noiseBoxLayout = new QGridLayout();
+    noiseBox->setLayout(noiseBoxLayout);
+    noiseBox->setMinimumWidth(200);
+
+    this->noise = new QCheckBox("Enable");
+    noiseBoxLayout->addWidget(noise, 0, 0, 1, 2, Qt::AlignLeft);
+
+    this->spectrum = new QCheckBox("Spectrum");
+    noiseBoxLayout->addWidget(spectrum, 0, 1, 1, 2, Qt::AlignLeft);
+
+    this->noiseAlpha = new QDoubleSpinBox(this);
+    this->noiseAlpha->setAlignment(Qt::AlignRight);
+    this->noiseAlpha->setMaximumWidth(50);
+    this->noiseAlpha->setMaximum(1);
+    this->noiseAlpha->setMinimum(0);
+    this->noiseAlpha->setValue(0.0);
+    noiseBoxLayout->addWidget(new QLabel("Alpha:", this), 1, 0, Qt::AlignRight);
+    noiseBoxLayout->addWidget(noiseAlpha, 1, 1, Qt::AlignLeft);
+
+    leftBarLayout->addWidget(noiseBox, 4, 0, 1, 4, Qt::AlignHCenter);
 
     /////////////DECODE OUTPUT////////////////
     auto dec = new QGroupBox("Decode output:", this);
@@ -148,7 +170,7 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     decodeOutput->setMinimumHeight(100);
     decLayout->addWidget(decodeOutput,0,0, Qt::AlignHCenter);
 
-    leftBarLayout->addWidget(dec, 4, 0 , 1, 4, Qt::AlignHCenter);
+    leftBarLayout->addWidget(dec, 5, 0 , 1, 4, Qt::AlignHCenter);
 
 
     QObject::connect(clk, &QCheckBox::stateChanged, this, [=]{displaySeries();});
@@ -169,6 +191,10 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     QObject::connect(rangeFrom, &QDoubleSpinBox::editingFinished, this, [=]{displaySeries();});
     QObject::connect(rangeTo, &QDoubleSpinBox::editingFinished, this, [=]{displaySeries();});
     QObject::connect(steps, &QSpinBox::textChanged, this, [=]{displaySeries();});
+
+    QObject::connect(noise, &QCheckBox::stateChanged, this, [=]{displaySeries();});
+    QObject::connect(spectrum, &QCheckBox::stateChanged, this, [=]{displaySeries();});
+    QObject::connect(noiseAlpha, &QDoubleSpinBox::textChanged, this, [=]{displaySeries();});
     displaySeries();
 }
 
@@ -197,7 +223,11 @@ void Lab7_8_9::displaySeries()
     if(ttl->checkState()==2)
     {
         auto mTTL = modTTL(clkSignal, bits);
+
+        if(noise->checkState()==2)
+            mTTL = addRandomNoise(mTTL, noiseAlpha->value());
         labSeries.append(mTTL);
+
         if(decode->checkState()==2)
         {
             if(hamming->checkState()==2)
@@ -210,7 +240,11 @@ void Lab7_8_9::displaySeries()
     if(man->checkState()==2)
     {
         auto mMan = modManchester(clkSignal, bits);
+
+        if(noise->checkState()==2)
+            mMan = addRandomNoise(mMan, noiseAlpha->value());
         labSeries.append(mMan);
+
         if(decode->checkState()==2)
         {
             if(hamming->checkState()==2)
@@ -222,7 +256,11 @@ void Lab7_8_9::displaySeries()
     if(nrzi->checkState()==2)
     {
         auto mNRZI = modNRZI(clkSignal, bits);
+
+        if(noise->checkState()==2)
+            mNRZI = addRandomNoise(mNRZI, noiseAlpha->value());
         labSeries.append(mNRZI);
+
         if(decode->checkState()==2)
         {
             if(hamming->checkState()==2)
@@ -234,7 +272,11 @@ void Lab7_8_9::displaySeries()
     if(bami->checkState()==2)
     {
         auto mBAMI = modBAMI(clkSignal, bits);
+
+        if(noise->checkState()==2)
+            mBAMI = addRandomNoise(mBAMI, noiseAlpha->value());
         labSeries.append(mBAMI);
+
         if(decode->checkState()==2)
         {
             if(hamming->checkState()==2)
@@ -243,6 +285,9 @@ void Lab7_8_9::displaySeries()
                 decodeOutput->appendPlainText("BAMI :  "+stringFromBits(decBAMI(clkVal, mBAMI), endianVal)+"\n");
         }
     }
+    if(spectrum->checkState()==2)
+        for(int i=0; i<labSeries.length(); i++)
+            labSeries[i] = calculateSpectrum(labSeries.at(i));
     chartView->chart()->removeAllSeries();
     addSeriesToChart(labSeries, 3);
 }
@@ -434,7 +479,7 @@ QBitArray Lab7_8_9::decTTL(int clockFreq, LabSeries mod)
         if(mod.xVec.at(i)>x)
         {
             x+=step;
-            bits.setBit(bit, mod.yVec.at(i)==1);
+            bits.setBit(bit, mod.yVec.at(i)>0.5);
             bit++;
         }
     }
@@ -490,12 +535,19 @@ QBitArray Lab7_8_9::decNRZI(int clockFreq, LabSeries mod)
         if(mod.xVec.at(i)>x)
         {
             x+=step;
-            bool newBit = mod.yVec.at(i) != prevBit;
-            prevBit = mod.yVec.at(i);
-            bits.setBit(bit, newBit);
+            int newBit;
+            if(mod.yVec.at(i) > 0.5)
+                newBit = 1;
+            else if(mod.yVec.at(i) < -0.5)
+                newBit = -1;
+            else
+                newBit = 0;
+            bits.setBit(bit, newBit!=prevBit);
+            prevBit = newBit;
             bit++;
         }
     }
+    qDebug()<<bits;
     bits.resize(bit);
     return bits;
 }
@@ -512,7 +564,7 @@ QBitArray Lab7_8_9::decBAMI(int clockFreq, LabSeries mod)
         if(mod.xVec.at(i)>x)
         {
             x+=step;
-            bool newBit = mod.yVec.at(i) != 0;
+            bool newBit = mod.yVec.at(i) > 0.5 || mod.yVec.at(i) < -0.5;
             bits.setBit(bit, newBit);
             bit++;
         }
@@ -661,5 +713,35 @@ void Lab7_8_9::reverseBitsInBytes(QBitArray &arr)
             arr.setBit(i*j,arr.at(j*8 - i*j - 1));
             arr.setBit(j*8 - i*j-1, bit);
         }
+}
+
+LabSeries Lab7_8_9::addRandomNoise(LabSeries series, double alpha)
+{
+    for(int i=0; i<series.yVec.length(); i++)
+    {
+        double noise = QRandomGenerator::global()->generateDouble()-0.5;
+        //(signal[n]*alfa)+(noise[nn]*(1.0-alfa))
+        series.yVec[i] = series.yVec[i]*alpha + noise*(1-alpha);
+    }
+    return series;
+}
+
+LabSeries Lab7_8_9::calculateSpectrum(LabSeries series)
+{
+    QVector<std::complex<double>> results = Lab3::calculateDFT(series.yVec);
+    QVector<double> xVec;
+    QVector<double> yVec;
+    int stepsVal = series.xVec.length();
+    double range = series.xVec.last() - series.xVec.first();
+    double step = range/stepsVal;
+    double fs = 1/step;
+    for(int i=0; i<results.length(); i++)
+    {
+        double y = abs(results.at(i));
+        double x = (i*(fs/stepsVal));
+        xVec.append(x);
+        yVec.append(10*log10(y));
+    }
+    return LabSeries(xVec, yVec, "Spectrum " + series.name);
 }
 

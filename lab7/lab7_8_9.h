@@ -70,6 +70,9 @@ public:
     QString stringFromBits(QBitArray bits, Endian e);
     void reverseBitsInBytes(QBitArray &arr);
 
+    LabSeries addRandomNoise(LabSeries series, double alpha);
+    LabSeries calculateSpectrum(LabSeries series);
+
     QChartViewWithZoomAndDrag* chartView;
 
     QCheckBox* clk;
@@ -89,6 +92,11 @@ public:
 
     QCheckBox* hamming;
     QSpinBox* errors;
+
+    QCheckBox* noise;
+    QCheckBox* spectrum;
+    QDoubleSpinBox* noiseAlpha;
+
     QPlainTextEdit* decodeOutput;
 };
 
