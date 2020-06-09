@@ -166,6 +166,8 @@ Lab7_8_9::Lab7_8_9(QWidget *parent) : QWidget(parent)
     dec->setMinimumWidth(200);
 
     this->decodeOutput = new QPlainTextEdit(this);
+    QFont font = QFont("Source Code", 7);
+    decodeOutput->setFont(font);
     decodeOutput->setReadOnly(true);
     decodeOutput->setMinimumHeight(100);
     decLayout->addWidget(decodeOutput,0,0, Qt::AlignHCenter);
@@ -211,11 +213,12 @@ void Lab7_8_9::displaySeries()
 
     LabSeries clkSignal = genCLK(clkVal, rangeF, rangeT, stepsVal);
     QBitArray bits = bitsFromString(inputVal, endianVal);
+    auto input = bits;
+    bits.resize(bitLimitVal);
 
     if(hamming->checkState()==2)
         bits = encodeHamming_4bit(bits, errors->value());
 
-    bits.resize(bitLimitVal);
     decodeOutput->clear();
 
     if(clk->checkState()==2)
@@ -230,11 +233,14 @@ void Lab7_8_9::displaySeries()
 
         if(decode->checkState()==2)
         {
+            QBitArray decoded;
             if(hamming->checkState()==2)
-                decodeOutput->appendPlainText("TTL :  "+stringFromBits(decHamming_4bit(decTTL(clkVal, mTTL)), endianVal)+"\n");
+                decoded = decHamming_4bit(decTTL(clkVal, mTTL));
             else
-                decodeOutput->appendPlainText("TTL :  "+stringFromBits(decTTL(clkVal, mTTL), endianVal)+"\n");
+                decoded = decTTL(clkVal, mTTL);
 
+            decodeOutput->appendPlainText("TTL :  "+stringFromBits(decoded, endianVal)+
+                                          "\nBER :  "+QString::number(calcBER(input, decoded))+"\n");
         }
     }
     if(man->checkState()==2)
@@ -247,10 +253,14 @@ void Lab7_8_9::displaySeries()
 
         if(decode->checkState()==2)
         {
+            QBitArray decoded;
             if(hamming->checkState()==2)
-                decodeOutput->appendPlainText("Manchester :  "+stringFromBits(decHamming_4bit(decManchester(clkVal, mMan)), endianVal)+"\n");
+                decoded = decHamming_4bit(decManchester(clkVal, mMan));
             else
-                decodeOutput->appendPlainText("Manchester :  "+stringFromBits(decManchester(clkVal, mMan), endianVal)+"\n");
+                decoded = decManchester(clkVal, mMan);
+
+            decodeOutput->appendPlainText("Man :  "+stringFromBits(decoded, endianVal)+
+                                          "\nBER :  "+QString::number(calcBER(input, decoded))+"\n");
         }
     }
     if(nrzi->checkState()==2)
@@ -263,10 +273,14 @@ void Lab7_8_9::displaySeries()
 
         if(decode->checkState()==2)
         {
+            QBitArray decoded;
             if(hamming->checkState()==2)
-                decodeOutput->appendPlainText("NRZI :  "+stringFromBits(decHamming_4bit(decNRZI(clkVal, mNRZI)), endianVal)+"\n");
+                decoded = decHamming_4bit(decNRZI(clkVal, mNRZI));
             else
-                decodeOutput->appendPlainText("NRZI :  "+stringFromBits(decNRZI(clkVal, mNRZI), endianVal)+"\n");
+                decoded = decNRZI(clkVal, mNRZI);
+
+            decodeOutput->appendPlainText("NRZI :  "+stringFromBits(decoded, endianVal)+
+                                          "\nBER :  "+QString::number(calcBER(input, decoded))+"\n");
         }
     }
     if(bami->checkState()==2)
@@ -279,10 +293,14 @@ void Lab7_8_9::displaySeries()
 
         if(decode->checkState()==2)
         {
+            QBitArray decoded;
             if(hamming->checkState()==2)
-                decodeOutput->appendPlainText("BAMI :  "+stringFromBits(decHamming_4bit(decBAMI(clkVal, mBAMI)), endianVal)+"\n");
+                decoded = decHamming_4bit(decBAMI(clkVal, mBAMI));
             else
-                decodeOutput->appendPlainText("BAMI :  "+stringFromBits(decBAMI(clkVal, mBAMI), endianVal)+"\n");
+                decoded = decBAMI(clkVal, mBAMI);
+
+            decodeOutput->appendPlainText("BAMI :  "+stringFromBits(decoded, endianVal)+
+                                          "\nBER :  "+QString::number(calcBER(input, decoded))+"\n");
         }
     }
     if(spectrum->checkState()==2)
@@ -743,5 +761,17 @@ LabSeries Lab7_8_9::calculateSpectrum(LabSeries series)
         yVec.append(10*log10(y));
     }
     return LabSeries(xVec, yVec, "Spectrum " + series.name);
+}
+
+double Lab7_8_9::calcBER(QBitArray input, QBitArray output)
+{
+    output.resize(input.count());
+    int errorCount = 0;
+    for(int i=0; i<input.count()&&i<output.count();i++)
+    {
+        if(input.at(i)!=output.at(i))
+            errorCount++;
+    }
+    return static_cast<double>(errorCount)/input.count();
 }
 

@@ -72,6 +72,7 @@ public:
 
     LabSeries addRandomNoise(LabSeries series, double alpha);
     LabSeries calculateSpectrum(LabSeries series);
+    double calcBER(QBitArray input, QBitArray output);
 
     QChartViewWithZoomAndDrag* chartView;
 
