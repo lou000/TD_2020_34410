@@ -708,7 +708,7 @@ QBitArray Lab7_8_9::bitsFromString(QString s, Endian e)
     const char* c = ba.data();
     QBitArray bitArr = QBitArray::fromBits(c,ba.size()*8);
     if(e == LittleEndian)
-        reverseBitsInBytes(bitArr);
+        reverseBitsInBytes(&bitArr);
     qDebug()<<"INPUT: "<<bitArr<<"\n";
     return bitArr;
 }
@@ -716,20 +716,22 @@ QBitArray Lab7_8_9::bitsFromString(QString s, Endian e)
 QString Lab7_8_9::stringFromBits(QBitArray bits, Endian e)
 {
     if(e == LittleEndian)
-        reverseBitsInBytes(bits);
+        reverseBitsInBytes(&bits);
     const char* c = bits.bits();
     return QString(c);
 }
 
-void Lab7_8_9::reverseBitsInBytes(QBitArray &arr)
+void Lab7_8_9::reverseBitsInBytes(QBitArray* arr)
 {
     //if byte is incomplete we dont reverse it
-    for(int j = 1; j<=arr.count()/8; j++)
-        for(int i=0; i<8;i++)
+    for(int j = 0; j<arr->count()/8; j++)
+        for(int i=0; i<4;i++)
         {
-            bool bit = arr.at(i*j);
-            arr.setBit(i*j,arr.at(j*8 - i*j - 1));
-            arr.setBit(j*8 - i*j-1, bit);
+            auto b = (i + j*8);
+            auto o = (j+1)*8 - 1 - i;
+            bool bit = arr->at(b);
+            arr->setBit(b, arr->at(o));
+            arr->setBit(o, bit);
         }
 }
 

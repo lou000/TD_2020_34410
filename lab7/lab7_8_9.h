@@ -68,7 +68,7 @@ public:
 
     QBitArray bitsFromString(QString s, Endian e);
     QString stringFromBits(QBitArray bits, Endian e);
-    void reverseBitsInBytes(QBitArray &arr);
+    void reverseBitsInBytes(QBitArray* arr);
 
     LabSeries addRandomNoise(LabSeries series, double alpha);
     LabSeries calculateSpectrum(LabSeries series);
