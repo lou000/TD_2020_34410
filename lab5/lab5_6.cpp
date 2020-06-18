@@ -708,16 +708,20 @@ QBitArray Lab5_6::bitsFromString(QString s, Endian e)
     const char* c = ba.data();
     QBitArray bitArr = QBitArray::fromBits(c,ba.size()*8);
     if(e == LittleEndian)
-        reverseBitArray(bitArr);
+        reverseBitsInBytes(&bitArr);
     return bitArr;
 }
-void Lab5_6::reverseBitArray(QBitArray &arr)
+void Lab5_6::reverseBitsInBytes(QBitArray* arr)
 {
-    for(int i=0; i<arr.count()/2;i++)
-    {
-        bool bit = arr.at(i);
-        arr.setBit(i,arr.at(arr.count()-1-i));
-        arr.setBit(arr.count()-1-i, bit);
-    }
+    //if byte is incomplete we dont reverse it
+    for(int j = 0; j<arr->count()/8; j++)
+        for(int i=0; i<4;i++)
+        {
+            auto b = (i + j*8);
+            auto o = (j+1)*8 - 1 - i;
+            bool bit = arr->at(b);
+            arr->setBit(b, arr->at(o));
+            arr->setBit(o, bit);
+        }
 }
 

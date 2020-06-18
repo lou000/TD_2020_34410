@@ -39,7 +39,7 @@ public:
     explicit Lab5_6(QWidget *parent = nullptr);
     void calculateSeries();
     QBitArray bitsFromString(QString s, Endian e);
-    void reverseBitArray(QBitArray &arr);
+    void reverseBitsInBytes(QBitArray* arr);
 
     QChartViewWithZoomAndDrag* chartView;
 
